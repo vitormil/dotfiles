@@ -1,0 +1,1168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Free PeepCode Blog</title>
+  <generator uri="http://effectif.com/nesta">Nesta</generator>
+  <id>tag:blog.peepcode.com,2009:/</id>
+  <link rel="self" href="http://blog.peepcode.com/articles.xml"/>
+  <link rel="alternate" href="http://blog.peepcode.com"/>
+  <subtitle type="text">Short, Free Screencasts for Web Developers and Alpha Geeks</subtitle>
+  <entry>
+    <title>Rethinking Rails 3 Controllers and Routes</title>
+    <link type="text/html" rel="alternate" href="http://blog.peepcode.com/tutorials/2010/rethinking-rails-3-routes"/>
+    <id>tag:blog.peepcode.com,2010-06-02:/tutorials/2010/rethinking-rails-3-routes</id>
+    <content type="html">&lt;p&gt;&lt;strong&gt;This article is heavily styled and is best viewed at &lt;a href="http://blog.peepcode.com/tutorials/2010/rethinking-rails-3-routes"&gt;PeepCode&lt;/a&gt;!&lt;/strong&gt;&lt;/p&gt;&lt;div class='column' id='disclaimer'&gt;
+  &lt;p&gt;&lt;span class="caps"&gt;DISCLAIMER&lt;/span&gt;: Reg Braithwaite delivered this quote in a completely different context&lt;sup class="footnote"&gt;&lt;a href="#fn1"&gt;1&lt;/a&gt;&lt;/sup&gt;, but I think it&amp;#8217;s applicable to the design of almost any software &lt;span class="caps"&gt;API&lt;/span&gt;. Illustration by Mike Rohde.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column article'&gt;
+  &lt;div class='row'&gt;
+    &lt;div class='column' id='intro'&gt;
+      &lt;p&gt;The &lt;strong&gt;Rails router&lt;/strong&gt; has been written and rewritten at least four
+      times&lt;sup class="footnote"&gt;&lt;a href="#fn2"&gt;2&lt;/a&gt;&lt;/sup&gt;, including a recent rewrite for the upcoming Rails
+      3. The syntax is now more concise.&lt;/p&gt;
+      &lt;p&gt;But never mind making it shorter! It&amp;#8217;s time for a &lt;strong&gt;final
+      rewrite&lt;/strong&gt;: Let&amp;#8217;s get rid of it altogether!&lt;/p&gt;
+      &lt;p&gt;Let&amp;#8217;s &lt;strong&gt;get rid&lt;/strong&gt; of the &lt;strong&gt;seven controller actions&lt;/strong&gt;: &lt;code&gt;index&lt;/code&gt;,
+      &lt;code&gt;show&lt;/code&gt;, &lt;code&gt;new&lt;/code&gt;, &lt;code&gt;create&lt;/code&gt;, &lt;code&gt;edit&lt;/code&gt;, &lt;code&gt;update&lt;/code&gt; and &lt;code&gt;delete&lt;/code&gt;. Their
+      meaning is blurred in the context of &lt;span class="caps"&gt;REST&lt;/span&gt;. They&amp;#8217;re an unhelpful
+      layer between programmer and protocol.&lt;/p&gt;
+      &lt;p&gt;Let&amp;#8217;s get rid of the trivial but &lt;strong&gt;cumbersome mental
+      translation&lt;/strong&gt; you have to do everytime you want to think about
+      the &lt;span class="caps"&gt;HTTP&lt;/span&gt; &lt;code&gt;GET&lt;/code&gt; method, the &lt;span class="caps"&gt;URL&lt;/span&gt;, the &lt;code&gt;index&lt;/code&gt; action, and the
+      &lt;code&gt;plural_path&lt;/code&gt; &lt;span class="caps"&gt;URL&lt;/span&gt; helper.&lt;/p&gt;
+      &lt;p&gt;Let&amp;#8217;s get rid of &lt;strong&gt;duplicate functionality&lt;/strong&gt; already implemented
+      in the controller. If you need to redirect, take action based
+      on the user agent, or examine headers, that should be done in
+      a controller!&lt;/p&gt;
+      &lt;p&gt;And let&amp;#8217;s &lt;strong&gt;start thinking in URLs&lt;/strong&gt;, resources, and APIs instead of
+      doing image caching in models or asset bundling in
+      view helpers. That&amp;#8217;s the controller&amp;#8217;s job. It scales better, too.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class='row'&gt;
+    &lt;div class='column' id='manifesto'&gt;
+      
+      &lt;ul&gt;
+      	&lt;li&gt;Routes are unnecessary configuration.&lt;/li&gt;
+      	&lt;li&gt;The seven standard controller actions are legacy.&lt;/li&gt;
+      	&lt;li&gt;Become intimate with your URLs &amp;#8211; don&amp;#8217;t abstract them away.&lt;/li&gt;
+      	&lt;li&gt;Decrease the distance between thought and implementation.&lt;/li&gt;
+      	&lt;li&gt;Let the controller do its job.&lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;li&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class='row problems first'&gt;
+    &lt;div class='column diagram'&gt;
+      &lt;h2&gt;Get Back to Thinking in URLs&lt;/h2&gt;
+      &lt;p&gt;A big part of the problem with a routing layer is that it
+      abstracts the developer away from the URLs that define the
+      application. This leads to poor &lt;span class="caps"&gt;API&lt;/span&gt; designs and convoluted
+      solutions to otherwise easy problems.&lt;/p&gt;
+      &lt;p&gt;This epiphany came while writing a few Sinatra
+      applications. The exact &lt;span class="caps"&gt;URL&lt;/span&gt; for a handler sits right in
+      front of my eyes as I write the code for it. I can&amp;#8217;t ignore it.&lt;/p&gt;
+      &lt;p&gt;As a result, I find myself spending more time thinking about
+      how my URLs are designed. Should I be serving &lt;span class="caps"&gt;JSON&lt;/span&gt; from the
+      same controller that serves the &lt;span class="caps"&gt;HTML&lt;/span&gt; interface, or should it
+      be organized separately?&lt;/p&gt;
+      &lt;p&gt;In contrast, you can write an entire Rails application without
+      ever looking at a &lt;span class="caps"&gt;URL&lt;/span&gt;. The design of URLs is delegated to the
+      framework, out of sight and out of mind.&lt;/p&gt;
+      &lt;p&gt;This isn&amp;#8217;t to say that we need to lose the good parts of how
+      Rails works with URLs. &lt;span class="caps"&gt;URL&lt;/span&gt; helper methods like
+      &lt;code&gt;pancake_path(:id)&lt;/code&gt; are a great idea for reducing duplication
+      and typos. They could be implemented apart from any router.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class='column prose'&gt;
+      &lt;blockquote&gt;I love URLs. I dream about them at night. I think about them before I think about anything else. &lt;cite&gt;&amp;mdash; Adrian Holovaty, co-creator of Django&lt;/cite&gt;&lt;/blockquote&gt;&lt;p class="caption"&gt;* From &lt;a href="http://matthewbuchanan.name/post/79527495/i-love-urls"&gt;Webstock 2009&lt;/a&gt;&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class='row problems'&gt;
+    &lt;div class='column diagram'&gt;
+      &lt;h2&gt;Retire the Seven Action Names&lt;/h2&gt;
+      &lt;p&gt;It has been three years since the seven controller actions had
+      any immediate meaning. The &lt;span class="caps"&gt;API&lt;/span&gt; no longer adds to the
+      programmer&amp;#8217;s understanding of the tasks at hand.&lt;/p&gt;
+      &lt;p&gt;Experienced programmers know that inline comments mark code
+      that&amp;#8217;s too confusing or too clever.&lt;/p&gt;
+      &lt;p&gt;Yet every Rails controller is generated with two lines of
+      repetitive comments for every action. That&amp;#8217;s a code smell! And
+      a failure of &lt;span class="caps"&gt;API&lt;/span&gt; design.&lt;/p&gt;
+      &lt;p&gt;Every Rails developer must memorize the table at right,
+      mapping &lt;span class="caps"&gt;HTTP&lt;/span&gt; method and &lt;span class="caps"&gt;URL&lt;/span&gt; to the controller action name. If
+      we can get rid of the action name, the rest of the table is
+      already self-explanatory.&lt;/p&gt;
+      &lt;p&gt;So instead of going through this extra syntactical layer, let&amp;#8217;s
+      deal directly with &lt;span class="caps"&gt;GET&lt;/span&gt;, &lt;span class="caps"&gt;POST&lt;/span&gt;, &lt;span class="caps"&gt;PUT&lt;/span&gt;, and &lt;span class="caps"&gt;DELETE&lt;/span&gt;. (Suggestions follow.)&lt;/p&gt;
+      &lt;p&gt;You can tell this is a great idea because it&amp;#8217;s the way unit tests
+      already work! Let&amp;#8217;s bring this syntax back to the controller and
+      complete the &lt;span class="caps"&gt;API&lt;/span&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class='column prose'&gt;
+      &lt;table&gt;
+      	&lt;tr&gt;
+      		&lt;th&gt;Method&lt;/th&gt;
+      		&lt;th&gt;&lt;span class="caps"&gt;URL&lt;/span&gt;&lt;/th&gt;
+      		&lt;th&gt;Action&lt;/th&gt;
+      		&lt;th&gt;Helper&lt;/th&gt;
+      	&lt;/tr&gt;
+      	&lt;tr&gt;
+      		&lt;td&gt;&lt;span class="caps"&gt;GET&lt;/span&gt;&lt;/td&gt;
+      		&lt;td&gt;/pancakes&lt;/td&gt;
+      		&lt;td class="action"&gt;index&lt;/td&gt;
+      		&lt;td&gt;pancakes_path&lt;/td&gt;
+      	&lt;/tr&gt;
+      	&lt;tr class="odd"&gt;
+      		&lt;td&gt; &lt;span class="caps"&gt;GET&lt;/span&gt;&lt;/td&gt;
+      		&lt;td&gt;/pancakes/:id&lt;/td&gt;
+      		&lt;td class="action"&gt;show&lt;/td&gt;
+      		&lt;td&gt;pancake_path(:id)&lt;/td&gt;
+      	&lt;/tr&gt;
+      	&lt;tr&gt;
+      		&lt;td&gt;&lt;span class="caps"&gt;GET&lt;/span&gt;&lt;/td&gt;
+      		&lt;td&gt;/pancakes/new&lt;/td&gt;
+      		&lt;td class="action"&gt;new&lt;/td&gt;
+      		&lt;td&gt;new_pancake_path&lt;/td&gt;
+      	&lt;/tr&gt;
+      	&lt;tr class="odd"&gt;
+      		&lt;td&gt; &lt;span class="caps"&gt;POST&lt;/span&gt;&lt;/td&gt;
+      		&lt;td&gt;/pancakes&lt;/td&gt;
+      		&lt;td class="action"&gt;create&lt;/td&gt;
+      		&lt;td&gt;pancakes_path&lt;/td&gt;
+      	&lt;/tr&gt;
+      	&lt;tr&gt;
+      		&lt;td&gt;&lt;span class="caps"&gt;GET&lt;/span&gt;&lt;/td&gt;
+      		&lt;td&gt;/pancakes/:id/edit&lt;/td&gt;
+      		&lt;td class="action"&gt;edit&lt;/td&gt;
+      		&lt;td&gt;edit_pancake_path(:id)&lt;/td&gt;
+      	&lt;/tr&gt;
+      	&lt;tr class="odd"&gt;
+      		&lt;td&gt; &lt;span class="caps"&gt;PUT&lt;/span&gt;&lt;/td&gt;
+      		&lt;td&gt;/pancakes/:id&lt;/td&gt;
+      		&lt;td class="action"&gt;update&lt;/td&gt;
+      		&lt;td&gt;pancake_path(:id)&lt;/td&gt;
+      	&lt;/tr&gt;
+      	&lt;tr&gt;
+      		&lt;td&gt;&lt;span class="caps"&gt;DELETE&lt;/span&gt;&lt;/td&gt;
+      		&lt;td&gt;/pancakes/:id&lt;/td&gt;
+      		&lt;td class="action"&gt;destroy&lt;/td&gt;
+      		&lt;td&gt;pancake_path(:id)&lt;/td&gt;
+      	&lt;/tr&gt;
+      &lt;/table&gt;
+      &lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2010/rethinking-rails-3-routes/controller-comments.rb"&gt;controller-comments.rb&lt;/a&gt;&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;# GET /pancakes&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# GET /pancakes.xml&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;index&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="c1"&gt;# POST /pancakes&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# POST /pancakes.xml&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;create&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+      &lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2010/rethinking-rails-3-routes/test-with-http-method.rb"&gt;test-with-http-method.rb&lt;/a&gt;&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;test&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;should create pancake&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;post&lt;/span&gt; &lt;span class="ss"&gt;:create&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;assert_redirected_to&lt;/span&gt; &lt;span class="n"&gt;pancake_path&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class='row problems last'&gt;
+    &lt;div class='column diagram'&gt;
+      &lt;h2&gt;Assets Are Resources&lt;/h2&gt;
+      &lt;p&gt;Thinking in URLs helps you solve web-related problems in the
+      right way.&lt;/p&gt;
+      &lt;p&gt;Exhibit A: If you deploy to a site whose view fragments are
+      already cached in memcached, it&amp;#8217;s likely that Rails&amp;#8217; asset
+      caching view helpers will not be called and &lt;span class="caps"&gt;CSS&lt;/span&gt; bundles will
+      not be generated.&lt;/p&gt;
+      &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;# Caching shouldn&amp;#39;t happen here&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;stylesheet_link_tag&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;a&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;b&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;c&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&amp;#x000A;                    &lt;span class="ss"&gt;:cache&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+      &lt;p&gt;This whole problem is easily solved by &lt;em&gt;using controllers to
+      do what they do best&lt;/em&gt;. Views and helpers should not generate
+      &lt;span class="caps"&gt;URL&lt;/span&gt;-based resources.&lt;/p&gt;
+      &lt;p&gt;The task of combining several &lt;span class="caps"&gt;CSS&lt;/span&gt; files into one file and
+      caching them to disk is &lt;em&gt;exactly&lt;/em&gt; the kind of task controllers
+      are built to do&lt;sup class="footnote"&gt;&lt;a href="#fn3"&gt;3&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class='column prose'&gt;
+      &lt;img src="/tutorials/2010/rethinking-rails-3-routes/asset-urls.png" alt="Controllers should generate and cache assets, not view helpers." title="Controllers should generate and cache assets, not view helpers." /&gt;&lt;p class="caption"&gt;Controllers should generate and cache assets, not view helpers.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class='row'&gt;
+    &lt;div class='column half'&gt;
+      &lt;h2&gt;Idea 1: Sinatra&lt;/h2&gt;
+      &lt;p&gt;There are many ways the controller &lt;span class="caps"&gt;API&lt;/span&gt; could be
+      improved. Existing attempts have failed to achieve wide
+      adoption because they have tried to handle controllers, views,
+      and models all at once&lt;sup class="footnote"&gt;&lt;a href="#fn4"&gt;4&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+      &lt;p&gt;Instead, I think a more limited, controller-only approach
+      could work better.&lt;/p&gt;
+      &lt;p&gt;The first is already in wide use: Sinatra.&lt;/p&gt;
+      &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;# Sinatra-style handler&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;/api/v1/report/:id&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nb"&gt;id&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="c1"&gt;# ...&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+      &lt;p&gt;Sinatra is arguably the most widely replicated Ruby web
+      framework, having inspired implementations in Node.js,
+      Clojure, &lt;span class="caps"&gt;PHP&lt;/span&gt;, Scala, and many other languages.&lt;/p&gt;
+      &lt;p&gt;Part of the problem with writing a routing &lt;span class="caps"&gt;API&lt;/span&gt; is finding a
+      way to describe multiple URLs in a single string. This problem
+      is solved if you handle each &lt;span class="caps"&gt;URL&lt;/span&gt; on its own.&lt;/p&gt;
+      &lt;p&gt;There&amp;#8217;s no middle routing layer with arbitrary action
+      names. &lt;span class="caps"&gt;HTTP&lt;/span&gt; method and &lt;span class="caps"&gt;URL&lt;/span&gt; are all you need (but handlers can
+      filter on the user agent or other header information).&lt;/p&gt;
+      &lt;p&gt;Thanks to Rack, Sinatra apps can be embedded in Rails
+      applications. Or, Carl Lerche is writing a Rails 3 plugin that
+      provides this syntax to Rails controllers&lt;sup class="footnote"&gt;&lt;a href="#fn5"&gt;5&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class='column half'&gt;
+      &lt;h2&gt;Idea 2: Method, Member, Collection&lt;/h2&gt;
+      &lt;p&gt;Jamis Buck introduced an implementation of &lt;span class="caps"&gt;REST&lt;/span&gt; as a plugin
+      &lt;em&gt;four years&lt;/em&gt; ago. Yet unlike other areas of Rails that have
+      seen massive improvements, Rails&amp;#8217; implementation of &lt;span class="caps"&gt;REST&lt;/span&gt; is
+      basically the same as it was in Rails 1.2.&lt;/p&gt;
+      &lt;p&gt;A halfway approach could combine elements of the Rails 3
+      router syntax with the class method style of configuration
+      that&amp;#8217;s already familiar to Rails developers.&lt;/p&gt;
+      &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;# Class method and HTTP-style methods.&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;ReportsController&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="no"&gt;AppController&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;before_filter&lt;/span&gt; &lt;span class="ss"&gt;:authenticate&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;resource&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;/api/v1/reports(/:id)&amp;quot;&lt;/span&gt;&amp;#x000A;&amp;#x000A;  &lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:collection&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&amp;#x000A;  &lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:member&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nb"&gt;id&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&amp;#x000A;  &lt;span class="n"&gt;put&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:member&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nb"&gt;id&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+      &lt;p&gt;Variations on this syntax could easily accomodate nested
+      resources, singleton resources, or other custom &lt;span class="caps"&gt;URL&lt;/span&gt; schemes.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class='row'&gt;
+    &lt;div class='column' id='conclusion'&gt;
+      &lt;h2&gt;Conclusion&lt;/h2&gt;
+      &lt;p&gt;For several years, Rails has charged forward and defined new,
+      innovative syntaxes for writing web applications. It&amp;#8217;s time for
+      it to happen again.&lt;/p&gt;
+      &lt;p&gt;An improved syntax could &lt;strong&gt;get rid of stale controller
+      actions&lt;/strong&gt;, &lt;strong&gt;reduce confusion&lt;/strong&gt;, &lt;strong&gt;reduce duplication&lt;/strong&gt;, and
+      &lt;strong&gt;improve&lt;/strong&gt; the way we think about solving technical problems
+      with web applications.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class='row'&gt;
+    &lt;div class='column' id='addendum'&gt;
+      &lt;h2&gt;Reactions&lt;/h2&gt;
+      &lt;p class="caption"&gt;Thanks to &lt;a href="http://reginald.braythwayt.com/"&gt;Reg Braithwaite&lt;/a&gt; and &lt;a href="http://benhoskin.gs/"&gt;Ben Hoskings&lt;/a&gt; for feedback on this article.&lt;/p&gt;&lt;p&gt;&lt;a href="http://benhoskin.gs/"&gt;Ben Hoskings&lt;/a&gt; said&lt;/p&gt;
+      &lt;blockquote&gt;
+      &lt;p&gt;I think the mere fact that a controller can be generated means that code shouldn&amp;#8217;t be there. There&amp;#8217;s no intelligence in code that can be generated from a single resource name.&lt;/p&gt;
+      &lt;/blockquote&gt;
+      &lt;blockquote&gt;
+      &lt;p&gt;I think it&amp;#8217;s doubly important because once you free the controller from having to implement the specifics of each action (like models doesn&amp;#8217;t have to implement the specifics of &lt;code&gt;#save&lt;/code&gt;), you have a lot more room to raise the abstraction level and start getting declarative.&lt;/p&gt;
+      &lt;/blockquote&gt;
+      &lt;blockquote&gt;
+      &lt;p&gt;I think making the controller more declarative is probably the end goal. Instead of the bulk of each action being an imperative mess, the controller can be heavier on the class-level configuration that&amp;#8217;s really proven itself in the model (associations, scopes, plugin configuration, etc.).&lt;/p&gt;
+      &lt;/blockquote&gt;
+      &lt;p&gt;The &lt;code&gt;provides&lt;/code&gt; class-level configuration directive in Merb/Rails 3 is a signal that controllers can head in this direction.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='column footnotes'&gt;
+  &lt;p&gt;Thoughts and reactions? Reply to &lt;a href="http://twitter.com/topfunky"&gt;@topfunky&lt;/a&gt; on Twitter, write a blog post of your own, or comment at &lt;a href="http://news.ycombinator.com/item?id=1398654"&gt;Hacker News&lt;/a&gt;.&lt;/p&gt;
+  &lt;p class="footnote" id="fn1"&gt;&lt;sup&gt;1&lt;/sup&gt; &lt;a href="http://www.infoq.com/presentations/braithwaite-rewrite-ruby"&gt;Video&lt;/a&gt; of Reg Braithwaite at RubyFringe. Quote is about 15:30 in.&lt;/p&gt;
+  &lt;p class="footnote" id="fn2"&gt;&lt;sup&gt;2&lt;/sup&gt; The original version by David Heinemeier Hansson, then by
+  Ulysses, then by Koz and Jamis Buck (together), and most recently
+  by Yehuda Katz, Josh Peek, and the Rails 3 team.&lt;/p&gt;
+  &lt;p class="footnote" id="fn3"&gt;&lt;sup&gt;3&lt;/sup&gt; &lt;a href="/tutorials/2010/rethinking-rails-3-routes/javascripts_controller.rb"&gt;Sample controller code&lt;/a&gt;. Versioning and expiration of assets are easily solved by storing a
+  version number in the application and appending it to the link
+  tag.&lt;/p&gt;
+  &lt;p class="footnote" id="fn4"&gt;&lt;sup&gt;4&lt;/sup&gt; See &lt;a href="http://github.com/benhoskings/hammock"&gt;hammock&lt;/a&gt; by Ben Hoskings, &lt;a href="http://github.com/hcatlin/make_resourceful"&gt;make_resourceful&lt;/a&gt; by Hampton Catlin and &lt;a href="http://github.com/jamesgolick/resource_controller"&gt;resource_controller&lt;/a&gt; by James Golick.&lt;/p&gt;
+  &lt;p class="footnote" id="fn5"&gt;&lt;sup&gt;5&lt;/sup&gt; Carl Lerche&amp;#8217;s &lt;a href="http://github.com/carllerche/astaire"&gt;Astaire&lt;/a&gt; plugin.&lt;/p&gt;
+&lt;/div&gt;
+</content>
+    <published>Wed Jun 02 16:00:00 +0000 2010</published>
+  </entry>
+  <entry>
+    <title>Am I the Only One Who Uses a Text Editor to Edit Files?</title>
+    <link type="text/html" rel="alternate" href="http://blog.peepcode.com/tutorials/2010/file-navigation-in-text-editors"/>
+    <id>tag:blog.peepcode.com,2010-03-25:/tutorials/2010/file-navigation-in-text-editors</id>
+    <content type="html">&lt;p&gt;&lt;strong&gt;This article is heavily styled and is best viewed at &lt;a href="http://blog.peepcode.com/tutorials/2010/file-navigation-in-text-editors"&gt;PeepCode&lt;/a&gt;!&lt;/strong&gt;&lt;/p&gt;&lt;div class='column article'&gt;
+  &lt;img src="/tutorials/2010/file-navigation-in-text-editors/mockup-cropped.png" alt="Files should be navigable by file, class, or method name and show metadata useful for distinguishing between similar files (mockup)." title="Files should be navigable by file, class, or method name and show metadata useful for distinguishing between similar files (mockup)." /&gt;&lt;p class="caption"&gt;Files should be navigable by file, class, or method name and show metadata useful for distinguishing between similar files (mockup).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column article split'&gt;
+  &lt;p&gt;If I had no experience with computers and were to guess which
+  group of people had the best software tools to do their job, I
+  would guess &amp;#8220;computer programmers.&amp;#8221;&lt;/p&gt;
+  &lt;p&gt;And if I were to guess what task would have been extensively
+  optimized, I would guess &amp;#8220;opening files.&amp;#8221;&lt;/p&gt;
+  &lt;p&gt;If you &lt;em&gt;are&lt;/em&gt; a programmer, you know that I would be wrong.&lt;/p&gt;
+  &lt;p&gt;Last summer, Dave Peck wrote about his hopes for a modern,
+  progressive, text editor.&lt;sup class="footnote"&gt;&lt;a href="#fn1"&gt;1&lt;/a&gt;&lt;/sup&gt; I&amp;#8217;d like to focus on one missing feature
+  that&amp;#8217;s absolutely possible today: powerful file navigation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column article title'&gt;
+  &lt;p&gt;&lt;img src="/tutorials/2010/file-navigation-in-text-editors/title-what-i-want.png" alt="" /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column feature first'&gt;
+  &lt;p&gt;&lt;img src="/tutorials/2010/file-navigation-in-text-editors/icon-keyboard.png" alt="" /&gt;&lt;/p&gt;
+  &lt;h4&gt;Keyboard&lt;/h4&gt;
+  &lt;p&gt;Perform any navigation task without touching the mouse.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column feature'&gt;
+  &lt;p&gt;&lt;img src="/tutorials/2010/file-navigation-in-text-editors/icon-fuzzy.png" alt="" /&gt;&lt;/p&gt;
+  &lt;h4&gt;Fuzzy Search&lt;/h4&gt;
+  &lt;p&gt;Find files by typing only a few letters.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column feature'&gt;
+  &lt;p&gt;&lt;img src="/tutorials/2010/file-navigation-in-text-editors/icon-path.png" alt="" /&gt;&lt;/p&gt;
+  &lt;h4&gt;Paths&lt;/h4&gt;
+  &lt;p&gt;Search includes folder names (relative to the project).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column feature'&gt;
+  &lt;p&gt;&lt;img src="/tutorials/2010/file-navigation-in-text-editors/icon-metadata.png" alt="" /&gt;&lt;/p&gt;
+  &lt;h4&gt;Metadata&lt;/h4&gt;
+  &lt;p&gt;File modification date and &lt;span class="caps"&gt;SCM&lt;/span&gt; status aid in file picking.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column feature'&gt;
+  &lt;p&gt;&lt;img src="/tutorials/2010/file-navigation-in-text-editors/icon-beautiful.png" alt="" /&gt;&lt;/p&gt;
+  &lt;h4&gt;Beautiful&lt;/h4&gt;
+  &lt;p&gt;Terminal raster graphics don&amp;#8217;t count! I want &lt;span class="caps"&gt;GUI&lt;/span&gt; beauty.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column article split'&gt;
+  &lt;p&gt;As every Vim user knows, most of one&amp;#8217;s time spent in a text editor is
+  spent &lt;em&gt;editing&lt;/em&gt;, not writing (this is why &lt;em&gt;Normal&lt;/em&gt; mode in Vim is
+  the one you use for navigation and editing).&lt;/p&gt;
+  &lt;p&gt;For most programming tasks, editing involves opening several files at
+  once and switching between them (e.g. &lt;span class="caps"&gt;HTML&lt;/span&gt;/JavaScript/&lt;span class="caps"&gt;CSS&lt;/span&gt;).&lt;/p&gt;
+  &lt;p&gt;I&amp;#8217;m talking about three tasks:&lt;/p&gt;
+  &lt;ul&gt;
+  	&lt;li&gt;Open any file on the computer.&lt;/li&gt;
+  	&lt;li&gt;Open any file in the current project.&lt;/li&gt;
+  	&lt;li&gt;Activate a file that&amp;#8217;s already open in another tab.&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;p&gt;And yet most text editors offload these important tasks to the
+  operating system or implement half-hearted custom solutions. Even
+  worse, third-party plugins frequently implement file-jumping
+  functionality for different frameworks with unique, cryptic key
+  mappings (e.g. between implementation and test or controller and
+  view template).&lt;/p&gt;
+  &lt;p&gt;This is a core task! Editors should approach it with the same
+  innovation and care they spend on basic text entry.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column article title'&gt;
+  &lt;p&gt;&lt;img src="/tutorials/2010/file-navigation-in-text-editors/title-current-editors.png" alt="" /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column editor'&gt;
+  &lt;h5&gt;TextMate&lt;/h5&gt;
+  &lt;div class="keyboard"&gt;Keyboard&lt;/div&gt;
+  &lt;div class="fuzzy"&gt;Fuzzy&lt;/div&gt;
+  &lt;div class="beautiful"&gt;Beautiful&lt;/div&gt;
+  &lt;p&gt;Command-T with &lt;strong&gt;fuzzy search was revolutionary&lt;/strong&gt; and was one of the
+  main reasons I bought a copy of TextMate. &lt;strong&gt;But it breaks down&lt;/strong&gt; for
+  projects with many files of the same name (such as Ruby on Rails).&lt;/p&gt;
+  &lt;img src="/tutorials/2010/file-navigation-in-text-editors/textmate-index.png" alt="There&amp;#8217;s no way to filter by directory." title="There&amp;#8217;s no way to filter by directory." /&gt;&lt;p class="caption"&gt;There&amp;#8217;s no way to filter by directory.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Tabs are even worse&lt;/strong&gt;. I frequently open more tabs than can fit on
+   my screen, which means that &lt;strong&gt;both usability and the extra tabs
+   get thrown out the window&lt;/strong&gt;. The tab menu can only be accessed
+   with the mouse and becomes a human-powered binary search of an
+   unsorted list.&lt;sup class="footnote"&gt;&lt;a href="#fn2"&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column editor'&gt;
+  &lt;h5&gt;Xcode&lt;/h5&gt;
+  &lt;div class="keyboard"&gt;Keyboard&lt;/div&gt;
+  &lt;div class="beautiful"&gt;Beautiful&lt;/div&gt;
+  &lt;p&gt;Xcode&amp;#8217;s &lt;em&gt;Open Quickly&lt;/em&gt; command (Command-Shift-D) only works with
+  &lt;strong&gt;the exact file name&lt;/strong&gt; starting with the &lt;strong&gt;first letter.&lt;/strong&gt;&lt;/p&gt;
+  &lt;img src="/tutorials/2010/file-navigation-in-text-editors/xcode-open-quickly.png" alt="Xcode&amp;#8217;s Open Quickly dialog" title="Xcode&amp;#8217;s Open Quickly dialog" /&gt;&lt;p class="caption"&gt;Xcode&amp;#8217;s Open Quickly dialog&lt;/p&gt;&lt;p&gt;Many Cocoa developers &lt;strong&gt;store all their code files in the root
+  directory&lt;/strong&gt; of the project and rely on Xcode&amp;#8217;s virtual directories
+  for organization, which is the only reason it&amp;#8217;s even &lt;strong&gt;barely
+  usable&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column editor'&gt;
+  &lt;h5&gt;Emacs&lt;/h5&gt;
+  &lt;div class="keyboard"&gt;Keyboard&lt;/div&gt;
+  &lt;div class="fuzzy"&gt;Fuzzy&lt;/div&gt;
+  &lt;div class="path"&gt;Path&lt;/div&gt;
+  &lt;p&gt;Emacs is the &lt;strong&gt;closest to satisfying&lt;/strong&gt; my requirements.&lt;/p&gt;
+  &lt;p&gt;The &lt;code&gt;ido-menu&lt;/code&gt; provides &lt;strong&gt;fuzzy search, including pathnames&lt;/strong&gt;. Chris
+  Wanstrath&amp;#8217;s textmate.el plugin&lt;sup class="footnote"&gt;&lt;a href="#fn3"&gt;3&lt;/a&gt;&lt;/sup&gt; wraps it in even more useful
+  functionality, such as autodiscovery of a project root based on
+  the existence of a &lt;code&gt;.git&lt;/code&gt; directory.&lt;/p&gt;
+  &lt;p&gt;&lt;strong&gt;Open buffers&lt;/strong&gt; (similar to tabs) can be searched for by name (&lt;code&gt;C-x b&lt;/code&gt;) or in a list (&lt;code&gt;C-x C-b&lt;/code&gt;).&lt;/p&gt;
+  &lt;p&gt;But the inline menu is an &lt;strong&gt;ugly&lt;/strong&gt; paragraph.&lt;/p&gt;
+  &lt;img src="/tutorials/2010/file-navigation-in-text-editors/emacs-find.png" alt="A powerful search hidden behind a mess of text." title="A powerful search hidden behind a mess of text." /&gt;&lt;p class="caption"&gt;A powerful search hidden behind a mess of text.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column article'&gt;
+  &lt;blockquote&gt;The only solution I can think of, so far,&lt;br /&gt;Is to smash out the windows with a crowbar. &lt;cite&gt;&amp;mdash; Buck 65&lt;/cite&gt;&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class='column article prototype'&gt;
+  &lt;p&gt;Once you start thinking about making file navigation better, the
+  ideas flow freely. Could a dialog &lt;strong&gt;search on class or method
+  names&lt;/strong&gt; instead of just filenames? What about a free-form search for
+  times and classes such as &amp;#8220;&lt;code&gt;yesterday Bacon#save&lt;/code&gt;&amp;#8221;?&lt;/p&gt;
+  &lt;p&gt;This article started with &lt;strong&gt;pain&lt;/strong&gt;, developed into an &lt;strong&gt;idea&lt;/strong&gt;, and ended up as an &lt;strong&gt;unexpected prototype&lt;/strong&gt; implemented in MacRuby. I&amp;#8217;m using it daily and am fine-tuning the interaction, visuals, features, and performance.&lt;/p&gt;
+  &lt;p&gt;The app is now available as &lt;a href="http://peepcode.com/products/peepopen"&gt;PeepOpen&lt;/a&gt; with a beautiful icon. Works with TextMate, Emacs, and MacVim.&lt;/p&gt;
+  &lt;p&gt;For other updates, follow @peepcode on Twitter &lt;a href="http://twitter.com/peepcode"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column article prototype-image'&gt;
+  &lt;img src="/tutorials/2010/file-navigation-in-text-editors/fuzzy-window-screenshot.png" alt="The initial prototype performs a fuzzy search on paths and lists file modification dates." title="The initial prototype performs a fuzzy search on paths and lists file modification dates." /&gt;&lt;p class="caption"&gt;The initial prototype performs a fuzzy search on paths and lists file modification dates.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column footnotes'&gt;
+  &lt;p&gt;You can contribute your own froth over the design and content of this article with the Neanderthals at &lt;a href="http://news.ycombinator.com/item?id=1219401"&gt;Hacker News&lt;/a&gt;.&lt;/p&gt;
+  &lt;p class="footnote" id="fn1"&gt;&lt;sup&gt;1&lt;/sup&gt; Dave Peck sends supplication to &lt;a href="http://davepeck.org/2009/05/14/dear-osx-editor-gods/"&gt;the text editor gods&lt;/a&gt;.&lt;/p&gt;
+  &lt;p class="footnote" id="fn2"&gt;&lt;sup&gt;2&lt;/sup&gt; The &lt;a href="http://code.leadmediapartners.com/"&gt;RubyAMP&lt;/a&gt; bundle for TextMate shows a simple list of open windows, but without fuzzy search.&lt;/p&gt;
+  &lt;p class="footnote" id="fn3"&gt;&lt;sup&gt;3&lt;/sup&gt; Chris Wanstrath&amp;#8217;s &lt;a href="http://github.com/defunkt/textmate.el"&gt;textmate.el&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+</content>
+    <published>Thu Mar 25 12:00:00 +0000 2010</published>
+  </entry>
+  <entry>
+    <title>About this Blog</title>
+    <link type="text/html" rel="alternate" href="http://blog.peepcode.com/tutorials/2010/about-this-blog"/>
+    <id>tag:blog.peepcode.com,2010-02-24:/tutorials/2010/about-this-blog</id>
+    <content type="html">&lt;p&gt;&lt;strong&gt;This article is heavily styled and is best viewed at &lt;a href="http://blog.peepcode.com/tutorials/2010/about-this-blog"&gt;PeepCode&lt;/a&gt;!&lt;/strong&gt;&lt;/p&gt;&lt;div class='column toc style'&gt;
+  &lt;h2&gt;Style&lt;/h2&gt;
+  &lt;p&gt;
+    Each post is uniquely styled within a grid.
+    &lt;a href='#style'&gt;&amp;darr;&lt;/a&gt;
+  &lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column toc sinatra'&gt;
+  &lt;h2&gt;Sinatra&lt;/h2&gt;
+  &lt;p&gt;
+    Generates static pages and graphics. Styles code samples.
+    &lt;a href='#sinatra'&gt;&amp;darr;&lt;/a&gt;
+  &lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column toc nosql'&gt;
+  &lt;h2&gt;No SQL&lt;/h2&gt;
+  &lt;p&gt;
+    Not even a database! File-based metadata.
+    &lt;a href='#nosql'&gt;&amp;darr;&lt;/a&gt;
+  &lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column toc haml'&gt;
+  &lt;h2&gt;Haml&lt;/h2&gt;
+  &lt;p&gt;
+    Powers article templates and markup.
+    &lt;a href='#haml'&gt;&amp;darr;&lt;/a&gt;
+  &lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column toc css'&gt;
+  &lt;h2&gt;SASS/CSS&lt;/h2&gt;
+  &lt;p&gt;
+    Comprehensive and reusable styling.
+    &lt;a href='#css'&gt;&amp;darr;&lt;/a&gt;
+  &lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column toc javascript'&gt;
+  &lt;h2&gt;JavaScript&lt;/h2&gt;
+  &lt;p&gt;
+    Taking it further&amp;hellip;custom behavior &amp;amp; graphics.
+    &lt;a href='#javascript'&gt;&amp;darr;&lt;/a&gt;
+  &lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column article' id='style'&gt;
+  &lt;h2&gt;Style&lt;/h2&gt;
+  &lt;div class='quote'&gt;
+    &lt;blockquote&gt;
+    &lt;p&gt;Before there were blogs we had websites. Beautiful, random websites that felt more like a zine &amp;#8212; one page looking nothing like the one before or after it.&lt;/p&gt;
+    &lt;/blockquote&gt;
+    &lt;cite&gt;Greg Storey, Airbag Industries&lt;sup class="footnote"&gt;&lt;a href="#fn1"&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/cite&gt;&lt;p&gt;&lt;img src="/tutorials/2010/about-this-blog/grid.png" alt="" /&gt;&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class='prose'&gt;
+    &lt;p&gt;Many developments in computer science have nothing to do with
+    the capabilities of computers, but with the way we use them.&lt;/p&gt;
+    &lt;p&gt;A few years ago, an article on Airbag Industries&lt;sup class="footnote"&gt;&lt;a href="#fn1"&gt;1&lt;/a&gt;&lt;/sup&gt; inspired me to
+    think about writing a blog with a unique design per post.&lt;/p&gt;
+    &lt;p&gt;There are many benefits:&lt;/p&gt;
+    &lt;ul&gt;
+    	&lt;li&gt;It encourages creativity both at the computer and away from it&lt;/li&gt;
+    	&lt;li&gt;It&amp;#8217;s like a code kata for design&lt;/li&gt;
+    	&lt;li&gt;You can easily experiment with cutting-edge CSS3 features or just learn CSS2&lt;/li&gt;
+    	&lt;li&gt;You&amp;#8217;ll learn how to build a style foundation for other designs in other applications&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;p&gt;On the downside, it takes more time than simply writing prose.&lt;/p&gt;
+    &lt;p&gt;Building an art-directed blog may seem as easy as dropping an
+    extra &lt;span class="caps"&gt;CSS&lt;/span&gt; &lt;code&gt;link&lt;/code&gt; tag into every blog post, but a little extra
+    work upfront makes it a lot easier.&lt;/p&gt;
+    &lt;p&gt;First, I started with a layout grid in &lt;span class="caps"&gt;CSS&lt;/span&gt;. Grids have been used
+    extensively in print design but have only recently become
+    popular in website design. I like Tyler Tate&amp;#8217;s 1kb grid&lt;sup class="footnote"&gt;&lt;a href="#fn2"&gt;2&lt;/a&gt;&lt;/sup&gt;
+    because it&amp;#8217;s the simplest thing necessary to accomplish the task.&lt;/p&gt;
+    &lt;p&gt;In standard website design, elements can be placed anywhere on a
+    page. In contrast, a grid defines boundaries in regular
+    increments, limiting the possibilities. Instead of stifling
+    creativity, it encourages experimentation by making it easier to
+    think about a finite number of widths for text or images.&lt;/p&gt;
+    &lt;p&gt;I use a 12 column grid (double-click anywhere on this page to
+    see it). Twelve columns are easily divided into other
+    increments: 12 &amp;middot; 6+6 &amp;middot; 2+5+5 &amp;middot; 4+4+4 &amp;middot; 3+3+3+3&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='column article' id='sinatra'&gt;
+  &lt;h2&gt;Sinatra&lt;/h2&gt;
+  &lt;div class='prose'&gt;
+    &lt;p&gt;The Sinatra web framework has a beautiful &lt;span class="caps"&gt;REST&lt;/span&gt; &lt;span class="caps"&gt;API&lt;/span&gt;, can be
+    extremely powerful, and is super fast.&lt;/p&gt;
+    &lt;p&gt;It&amp;#8217;s easily deployed with Phusion Passenger alongside my other
+    Rack-based web applications.&lt;/p&gt;
+    &lt;p&gt;I started with the Nesta&lt;sup class="footnote"&gt;&lt;a href="#fn4"&gt;4&lt;/a&gt;&lt;/sup&gt; blog engine and enhanced it with the
+    additional &lt;span class="caps"&gt;CSS&lt;/span&gt; and graphic generation features I needed. All
+    pages are cached statically with Sinatra::Cache&lt;sup class="footnote"&gt;&lt;a href="#fn5"&gt;5&lt;/a&gt;&lt;/sup&gt; for even
+    greater speed. Although this blog could be generated with a
+    static site generator, I find it more natural to write it in a
+    dynamic style.&lt;/p&gt;
+    &lt;p&gt;One example is the generation of text headline images with the
+    Textorize&lt;sup class="footnote"&gt;&lt;a href="#fn6"&gt;6&lt;/a&gt;&lt;/sup&gt; renderer from Thomas Fuchs. I reference the images
+    by &lt;span class="caps"&gt;URL&lt;/span&gt; in my &lt;span class="caps"&gt;CSS&lt;/span&gt; files. Sinatra generates the graphic on the fly
+    when that &lt;span class="caps"&gt;URL&lt;/span&gt; is accesed (then caches it). Sinatra keeps URLs at
+    the forefront of the web developer&amp;#8217;s mind &amp;#8212; where they should be!&lt;/p&gt;
+    &lt;p&gt;Other resources are generated at the view level when
+    needed. Code snippets are formatted by the Pygments&lt;sup class="footnote"&gt;&lt;a href="#fn7"&gt;7&lt;/a&gt;&lt;/sup&gt;
+    command-line script via a special RedCloth tag implemented as a
+    Haml filter.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class='graphic'&gt;
+    &lt;img alt='textorize' src='/tutorials/2010/about-this-blog/textorize.png' /&gt;
+    &lt;p class='caption'&gt;
+      Textorize (right half) renders text edges smoothly.
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='column article' id='nosql'&gt;
+  &lt;h2&gt;No SQL&lt;/h2&gt;
+  &lt;div class='code'&gt;
+    &lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2010/about-this-blog/metadata.yml"&gt;metadata.yml&lt;/a&gt;&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="l-Scalar-Plain"&gt;heading&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;About this Blog&lt;/span&gt;&amp;#x000A;&lt;span class="l-Scalar-Plain"&gt;heading-font&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;Klavika-BoldCondensed&lt;/span&gt;&amp;#x000A;&lt;span class="l-Scalar-Plain"&gt;heading-color&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="c1"&gt;#000&lt;/span&gt;&amp;#x000A;&lt;span class="l-Scalar-Plain"&gt;heading-background&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;transparent&lt;/span&gt;&amp;#x000A;&lt;span class="l-Scalar-Plain"&gt;published&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;December 30 2019 at 6pm&lt;/span&gt;&amp;#x000A;&lt;span class="l-Scalar-Plain"&gt;categories&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;meta design&lt;/span&gt;&amp;#x000A;&lt;span class="l-Scalar-Plain"&gt;summary&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;An article about...&lt;/span&gt;&amp;#x000A;&lt;span class="l-Scalar-Plain"&gt;format&lt;/span&gt;&lt;span class="p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l-Scalar-Plain"&gt;haml&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="l-Scalar-Plain"&gt;.column.article&lt;/span&gt;&amp;#x000A;  &lt;span class="l-Scalar-Plain"&gt;%h2 Bacon&lt;/span&gt;&amp;#x000A;&amp;#x000A;  &lt;span class="l-Scalar-Plain"&gt;:custom&lt;/span&gt;&amp;#x000A;    &lt;span class="l-Scalar-Plain"&gt;Haml and textile together...&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class='prose'&gt;
+    &lt;p&gt;It&amp;#8217;s much easier to debug a visual design in development on the
+    local machine, check the whole thing into Git, and deploy when
+    ready. No need to write an authentication system or an article
+    preview mechanism.&lt;/p&gt;
+    &lt;p&gt;Article files are stored on disk with a bit of &lt;span class="caps"&gt;YAML&lt;/span&gt;-esque
+    metadata at the top. Each article can be in Textile format, or
+    can use the full power of Haml for more complicated markup.&lt;/p&gt;
+    &lt;p&gt;Early on I needed to store information about the title&amp;#8217;s font
+    size and color. Later I needed to add other custom fields for
+    additional tagging. With an &lt;span class="caps"&gt;ORM&lt;/span&gt; this would have meant writing a
+    migration and installing a plugin to manage tags.&lt;/p&gt;
+    &lt;p&gt;There was no such problem here! I just added a few key-value
+    pairs to the article&amp;#8217;s metadata and started using them in the
+    application immediately.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='column article' id='haml'&gt;
+  &lt;h2&gt;Haml&lt;/h2&gt;
+  &lt;div class='prose'&gt;
+    &lt;p&gt;Not only does each post get its own &lt;span class="caps"&gt;CSS&lt;/span&gt;, it can also specify its
+    own &lt;span class="caps"&gt;HTML&lt;/span&gt;, via Haml&lt;sup class="footnote"&gt;&lt;a href="#fn8"&gt;8&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+    &lt;p&gt;When I&amp;#8217;m designing visually in the browser, I&amp;#8217;m thinking
+    primarily about blocks of text and images, and how they will be
+    styled. I don&amp;#8217;t want to be thinking about &lt;span class="caps"&gt;HTML&lt;/span&gt; boilerplate or
+    need to hunt to find a matching end tag.&lt;/p&gt;
+    &lt;p&gt;Haml decreases the mental distance between &lt;span class="caps"&gt;HTML&lt;/span&gt; and &lt;span class="caps"&gt;CSS&lt;/span&gt;. I work
+    directly with &lt;span class="caps"&gt;CSS&lt;/span&gt; selectors no matter what file I happen to be
+    in.&lt;/p&gt;
+    &lt;p&gt;But Haml isn&amp;#8217;t well suited to working with inline
+    text. Fortunately, there&amp;#8217;s Textile&lt;sup class="footnote"&gt;&lt;a href="#fn9"&gt;9&lt;/a&gt;&lt;/sup&gt; for that!&lt;/p&gt;
+    &lt;p&gt;The differences between the basic syntaxes of Textile and
+    Markdown are negligible. Where it pulls away from Markdown is
+    when you add new tags of your own. You can write view helpers
+    that take a simple string and turn it into a group of &lt;span class="caps"&gt;HTML&lt;/span&gt;
+    tags. It&amp;#8217;s not only faster to type, but I can build reusable
+    elements for movie links, syntax-highlighted code snippets, pull
+    quotes, and product boxes.&lt;/p&gt;
+    &lt;p&gt;Textile enhancements are easily used inline within any Haml
+    document. In RedCloth 4, the steps are:&lt;/p&gt;
+    &lt;ul&gt;
+    	&lt;li&gt;Write a module with methods for each of the tags you want to use (such as &lt;code&gt;movie&lt;/code&gt; at right).&lt;/li&gt;
+    	&lt;li&gt;In each method, examine the &lt;code&gt;:text&lt;/code&gt; key in the options, then build and return an &lt;span class="caps"&gt;HTML&lt;/span&gt; string. I build links for the &lt;code&gt;mov&lt;/code&gt; and &lt;code&gt;m4v&lt;/code&gt; versions of each movie.&lt;/li&gt;
+    	&lt;li&gt;Write a Haml filter. The name of your module will be used as the name of the filter.&lt;/li&gt;
+    	&lt;li&gt;Extend RedCloth with your custom module.&lt;/li&gt;
+    	&lt;li&gt;Add more methods to your tags module as needed.&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;p&gt;The code samples at right were built this way. I specify a path
+    to a source file and it runs it through &lt;code&gt;pygmentize&lt;/code&gt;. It also
+    prepends a link to the source file itself.&lt;/p&gt;
+    &lt;p&gt;The end result is a text system customized for writing about
+    code, but it looks great, too! I can&amp;#8217;t imagine using a &lt;span class="caps"&gt;CMS&lt;/span&gt; that
+    was any less powerful than this.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class='code'&gt;
+    &lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2010/about-this-blog/textile_in_use.haml"&gt;textile_in_use.haml&lt;/a&gt;&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nc"&gt;.column.article&lt;/span&gt;&amp;#x000A;&amp;#x000A;  &lt;span class="nt"&gt;%h2&lt;/span&gt; Custom Filter Sample&amp;#x000A; &amp;#x000A;  &lt;span class="nd"&gt;:custom_red_cloth&lt;/span&gt;&amp;#x000A;&amp;#x000A;    &lt;span class="nd"&gt;movie. http://example.com/movie.mov&lt;/span&gt;&amp;#x000A;&amp;#x000A;    &lt;span class="nd"&gt;source. /tutorials/code.rb&lt;/span&gt;&amp;#x000A;&amp;#x000A;    &lt;span class="nd"&gt;buy. http://peepcode.com/products&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2010/about-this-blog/custom_tags.rb"&gt;custom_tags.rb&lt;/a&gt;&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;module&lt;/span&gt; &lt;span class="nn"&gt;CustomTags&lt;/span&gt;&amp;#x000A;  &amp;#x000A;  &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;movie&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;opts&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;    &lt;span class="n"&gt;my_text&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;opts&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:text&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&amp;#x000A;    &lt;span class="c1"&gt;# Build an HTML string around my_text&lt;/span&gt;&amp;#x000A;    &lt;span class="c1"&gt;# ...&lt;/span&gt;&amp;#x000A;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;my_text&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;  &amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2010/about-this-blog/custom_haml_filter.rb"&gt;custom_haml_filter.rb&lt;/a&gt;&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;module&lt;/span&gt; &lt;span class="nn"&gt;Haml&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;module&lt;/span&gt; &lt;span class="nn"&gt;Filters&lt;/span&gt;&amp;#x000A;&amp;#x000A;    &lt;span class="c1"&gt;# Renders custom textile.    &lt;/span&gt;&amp;#x000A;    &lt;span class="k"&gt;module&lt;/span&gt; &lt;span class="nn"&gt;CustomRedCloth&lt;/span&gt;&amp;#x000A;      &lt;span class="kp"&gt;include&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;Haml&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;Filters&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;Base&lt;/span&gt;&amp;#x000A;      &lt;span class="n"&gt;lazy_require&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;custom_tags&amp;#39;&lt;/span&gt;&amp;#x000A;&amp;#x000A;      &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;        &lt;span class="n"&gt;red_cloth&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;RedCloth&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;        &lt;span class="n"&gt;red_cloth&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hard_breaks&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kp"&gt;false&lt;/span&gt;&amp;#x000A;        &lt;span class="n"&gt;red_cloth&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;extend&lt;/span&gt; &lt;span class="no"&gt;CustomTags&lt;/span&gt;&amp;#x000A;        &lt;span class="n"&gt;red_cloth&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to_html&lt;/span&gt;&amp;#x000A;      &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;    &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='column article' id='css'&gt;
+  &lt;h2&gt;SASS/CSS&lt;/h2&gt;
+  &lt;div class='code'&gt;
+    &lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2010/about-this-blog/article_sample.sass"&gt;article_sample.sass&lt;/a&gt;&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;@import&lt;/span&gt; &lt;span class="s"&gt;../page_util&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;@import&lt;/span&gt; &lt;span class="s"&gt;../pygments_pastie&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="nd"&gt;+masthead-reset&lt;/span&gt;&amp;#x000A;&lt;span class="nd"&gt;+dark-logo&lt;/span&gt;&amp;#x000A;&lt;span class="nd"&gt;+dark-masthead-menu&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="nv"&gt;!base_color&lt;/span&gt;&lt;span class="o"&gt; =&lt;/span&gt; &lt;span class="mh"&gt;#d1e3ff&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="nc"&gt;.prose&lt;/span&gt;&amp;#x000A;  &lt;span class="nd"&gt;+grid_6&lt;/span&gt;&amp;#x000A;  &lt;span class="na"&gt;float:&lt;/span&gt; &lt;span class="no"&gt;left&lt;/span&gt;&amp;#x000A;  &lt;span class="nt"&gt;margin&lt;/span&gt;&lt;span class="nd"&gt;:&lt;/span&gt;&amp;#x000A;    &lt;span class="na"&gt;left&lt;/span&gt;&lt;span class="o"&gt; =&lt;/span&gt; &lt;span class="nv"&gt;!grid_gutter_width&lt;/span&gt;&amp;#x000A;    &lt;span class="na"&gt;top&lt;/span&gt;&lt;span class="o"&gt;  =&lt;/span&gt; &lt;span class="nv"&gt;!line_height&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;p&gt;&lt;img src="/tutorials/2010/about-this-blog/archives-screenshot.png" alt="" /&gt;&lt;/p&gt;
+    &lt;p class="caption"&gt;Archives page with screenshots&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class='prose'&gt;
+    &lt;p&gt;In a recent copy of &lt;em&gt;Print Magazine&lt;/em&gt;&lt;sup class="footnote"&gt;&lt;a href="#fn11"&gt;11&lt;/a&gt;&lt;/sup&gt;, someone talked about
+    designing a &amp;#8220;style sheet&amp;#8221; for the magazine back in the 70&amp;#8217;s. For
+    some reason, the extra space jolted my brain into thinking
+    differently. Style. Sheet.&lt;/p&gt;
+    &lt;p&gt;A stylesheet isn&amp;#8217;t supposed to be a receptacle into which one
+    tosses a bunch of unrelated visual directives. It&amp;#8217;s a coherent
+    guideline for how things should look. It should be planned and
+    reusable. And like backend code, it may take several iterations
+    of use in the real world to get it right.&lt;/p&gt;
+    &lt;p&gt;&lt;acronym title="Syntactically Awesome Style Sheets"&gt;&lt;span class="caps"&gt;SASS&lt;/span&gt;&lt;/acronym&gt; is a huge part of
+    achieving that concept in this blog.&lt;/p&gt;
+    &lt;p&gt;People get emotional when they hear about &lt;span class="caps"&gt;SASS&lt;/span&gt;. Either they see
+    it as a threat to traditional &lt;span class="caps"&gt;CSS&lt;/span&gt; (used only by hacks who
+    haven&amp;#8217;t taken the time to learn it) or they welcome it as the
+    best thing to happen to the Internet.&lt;/p&gt;
+    &lt;p&gt;After working with this blog for a few months, I&amp;#8217;m in the second camp.&lt;/p&gt;
+    &lt;p&gt;As an example, any page can be designed with a light or a dark
+    background. A few mixins at the top automatically adjust the
+    page background, logo color (implemented as an image sprite),
+    and menu colors. All these are contained in the stylesheet and
+    don&amp;#8217;t require any modification of the page&amp;#8217;s &lt;span class="caps"&gt;HTML&lt;/span&gt;.&lt;/p&gt;
+    &lt;p&gt;The technical parts of the grid and vertical rhythm are also
+    wired into my &lt;span class="caps"&gt;SASS&lt;/span&gt; stylesheets. I can give elements meaningful
+    names in &lt;span class="caps"&gt;HTML&lt;/span&gt;, then specify &lt;code&gt;+grid_6&lt;/code&gt; in &lt;span class="caps"&gt;SASS&lt;/span&gt; to make the
+    element six columns wide (alternately, I could have used
+    arguments like &lt;code&gt;grid(6)&lt;/code&gt;).&lt;/p&gt;
+    &lt;p&gt;Variables like &lt;code&gt;grid_gutter_width&lt;/code&gt; and &lt;code&gt;line_height&lt;/code&gt; are
+    available to the whole application. I rarely type a number;
+    instead I use meaningful variables to add margins or manipulate
+    elements into position.&lt;/p&gt;
+    &lt;p class="highlight-file-link small"&gt;&lt;a href="http://blog.peepcode.com/stylesheets/sass/_grid.sass"&gt;_grid.sass&lt;/a&gt;&lt;/p&gt;&lt;p&gt;And if I&amp;#8217;m going to spend that much time in the powder room, I
+    want to show it off. The &lt;a href="/archives"&gt;archives&lt;/a&gt; page uses
+    webkit2png.py&lt;sup class="footnote"&gt;&lt;a href="#fn10"&gt;10&lt;/a&gt;&lt;/sup&gt; to take a screenshot of each page and display
+    it in a grid.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='column article' id='javascript'&gt;
+  &lt;h2&gt;JavaScript&lt;/h2&gt;
+  &lt;div class='prose'&gt;
+    &lt;p&gt;A unique design for each post is great, but how about unique
+    &lt;em&gt;JavaScript&lt;/em&gt; for each post?&lt;/p&gt;
+    &lt;p&gt;For my Rails 3 upgrade screencast, I wanted to show a timeline
+    of Rails release dates. I&amp;#8217;ve recently become enamored with
+    RaphaelJS&lt;sup class="footnote"&gt;&lt;a href="#fn12"&gt;12&lt;/a&gt;&lt;/sup&gt; and it took only a few lines of code to import a
+    JavaScript file for posts that want one.&lt;/p&gt;
+    &lt;p&gt;I wrote a custom &lt;code&gt;Timeline&lt;/code&gt; function that plots dates as large
+    dots.&lt;/p&gt;
+    &lt;h4&gt;Conclusion&lt;/h4&gt;
+    &lt;p&gt;As with many features of this blog, it will take a while to
+    figure out how to use them all fully. In the meantime, it&amp;#8217;s a
+    great learning experience and a fun output for creativity.&lt;/p&gt;
+    &lt;p&gt;I haven&amp;#8217;t published the source yet and may never. But now you
+    have the ideas&amp;#8230;implement them on your own blog!&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class='code'&gt;
+    &lt;p&gt;&lt;img src="/tutorials/2010/about-this-blog/graph.png" alt="" /&gt;&lt;/p&gt;
+    &lt;p class="caption"&gt;In an earlier post, RaphaelJS was used to chart Rails release dates.&lt;/p&gt;&lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2010/about-this-blog/custom.js"&gt;custom.js&lt;/a&gt;&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;jQuery&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&amp;#x000A;&amp;#x000A;  &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;paper&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;Raphael&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;graph&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;940&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;81&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&amp;#x000A;    &lt;span class="nx"&gt;timeline&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&amp;#x000A;&amp;#x000A;  &lt;span class="nx"&gt;timeline&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;Timeline&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;paper&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&amp;#x000A;    &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;date&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;06/25/2004&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;version&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;0.5&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;&amp;#x000A;    &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;date&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;12/13/2005&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;version&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;1.0.0&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;&amp;#x000A;    &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;date&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;12/07/2007&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;version&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;2.0.0&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;&amp;#x000A;    &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;date&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;6/10/2010&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="nx"&gt;version&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;3.0 ?&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&amp;#x000A;  &lt;span class="p"&gt;]);&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="p"&gt;});&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='column footnotes'&gt;
+  &lt;p class="footnote" id="fn1"&gt;&lt;sup&gt;1&lt;/sup&gt; Airbag Industries wrote on &lt;a href="http://www.airbagindustries.com/archives/airbag/boxes.php"&gt;the old days when blogs were designed like zines&lt;/a&gt;.&lt;/p&gt;
+  &lt;p class="footnote" id="fn2"&gt;&lt;sup&gt;2&lt;/sup&gt; The &lt;a href="http://1kbgrid.com/"&gt;1kb grid&lt;/a&gt; is the simplest thing necessary to get the job done. I convert it to &lt;span class="caps"&gt;SASS&lt;/span&gt; with the included &lt;code&gt;css2sass&lt;/code&gt; command.&lt;/p&gt;
+  &lt;p class="footnote" id="fn3"&gt;&lt;sup&gt;3&lt;/sup&gt; With a hack to &lt;a href="http://github.com/topfunky/emacs-starter-kit/blob/master/topfunky-sinatra.el"&gt;ruby-mode&lt;/a&gt; in Emacs, I can easily jump to any Sinatra &lt;span class="caps"&gt;URL&lt;/span&gt; handler in a file.&lt;/p&gt;
+  &lt;p class="footnote" id="fn4"&gt;&lt;sup&gt;4&lt;/sup&gt; &lt;a href="http://effectif.com/nesta"&gt;Nesta&lt;/a&gt; is a minimal blog engine by Graham Ashton (but easy to extend). It&amp;#8217;s built on the &lt;a href="http://www.sinatrarb.com/"&gt;Sinatra&lt;/a&gt; web framework.&lt;/p&gt;
+  &lt;p class="footnote" id="fn5"&gt;&lt;sup&gt;5&lt;/sup&gt; Sinatra::Cache &lt;a href="http://github.com/kematzy/sinatra-cache"&gt;source code&lt;/a&gt;&lt;/p&gt;
+  &lt;p class="footnote" id="fn6"&gt;&lt;sup&gt;6&lt;/sup&gt; &lt;a href="http://textorize.org/"&gt;Textorize text renderer&lt;/a&gt;&lt;/p&gt;
+  &lt;p class="footnote" id="fn7"&gt;&lt;sup&gt;7&lt;/sup&gt; &lt;a href="http://pygments.org/"&gt;Pygments&lt;/a&gt; is the best syntax highlighter out there. When you view diffs and code at &lt;a href="http://github.com"&gt;GitHub&lt;/a&gt;, you&amp;#8217;re viewing pygments. &lt;a href="http://gist.github.com/23914"&gt;Pipe code to it&lt;/a&gt; on the command line.&lt;/p&gt;
+  &lt;p class="footnote" id="fn8"&gt;&lt;sup&gt;8&lt;/sup&gt; The &lt;a href="http://haml-lang.com"&gt;Haml&lt;/a&gt; template engine is available for Ruby and other languages.&lt;/p&gt;
+  &lt;p class="footnote" id="fn9"&gt;&lt;sup&gt;9&lt;/sup&gt; &lt;a href="http://www.textism.com/tools/textile/"&gt;Textile&lt;/a&gt; is a syntax for formatting prose.&lt;/p&gt;
+  &lt;p class="footnote" id="fn10"&gt;&lt;sup&gt;10&lt;/sup&gt; &lt;a href="http://www.paulhammond.org/webkit2png/"&gt;webkit2png.py&lt;/a&gt; is a capable screenshot capturing script for Mac OS X. There&amp;#8217;s a Ruby port, but the original works well enough that I don&amp;#8217;t see the need. I&amp;#8217;ve wrapped it in the &lt;a href="http://github.com/topfunky/osxscreenshot"&gt;osxscreenshot&lt;/a&gt; gem.&lt;/p&gt;
+  &lt;p class="footnote" id="fn11"&gt;&lt;sup&gt;11&lt;/sup&gt; &lt;a href="http://printmag.com/"&gt;Print Magazine&lt;/a&gt; is a classic (over 70 years in publication). &lt;a href="http://www.baselinemagazine.com/browse_buy/magazine/current_issue/cover/"&gt;Baseline Magazine&lt;/a&gt; is a more academic European counterpart. I recently bought a subscription to both.&lt;/p&gt;
+  &lt;p class="footnote" id="fn12"&gt;&lt;sup&gt;12&lt;/sup&gt; &lt;a href="http://raphaeljs.com/"&gt;RaphaelJS&lt;/a&gt; is a JavaScript-based &lt;span class="caps"&gt;SVG&lt;/span&gt; drawing library.&lt;/p&gt;
+  &lt;p class="footnote" id="fn13"&gt;&lt;sup&gt;13&lt;/sup&gt; The &lt;a href="http://www.barbariangroup.com/software/plainview"&gt;Plainview web browser&lt;/a&gt; is a full-screen browser, useful not only for &lt;span class="caps"&gt;HTML&lt;/span&gt;-based presentations.&lt;/p&gt;
+&lt;/div&gt;
+</content>
+    <published>Wed Feb 24 18:00:00 +0000 2010</published>
+  </entry>
+  <entry>
+    <title>What Pythonistas Think of Ruby</title>
+    <link type="text/html" rel="alternate" href="http://blog.peepcode.com/tutorials/2010/what-pythonistas-think-of-ruby"/>
+    <id>tag:blog.peepcode.com,2010-02-03:/tutorials/2010/what-pythonistas-think-of-ruby</id>
+    <content type="html">&lt;p&gt;&lt;strong&gt;This article is heavily styled and is best viewed at &lt;a href="http://blog.peepcode.com/tutorials/2010/what-pythonistas-think-of-ruby"&gt;PeepCode&lt;/a&gt;!&lt;/strong&gt;&lt;/p&gt;&lt;div class='column article'&gt;
+  &lt;p class='caption' id='not-a-python'&gt;
+    San Pueblan Milksnake
+  &lt;/p&gt;
+  &lt;blockquote id='ugly'&gt;
+    The very things I find ugly in Ruby are what make amazing Ruby software like RSpec possible, and that Python could never have (given the current implementation).
+    &lt;cite&gt;
+      Gary Bernhardt
+    &lt;/cite&gt;
+  &lt;/blockquote&gt;
+  &lt;blockquote id='damn'&gt;
+    I think Ruby's syntax is ugly until they do something glorious and beautiful with it like Rake, then I think "damn it!"
+    &lt;cite&gt;
+      Unidentified Attendee
+    &lt;/cite&gt;
+  &lt;/blockquote&gt;
+  &lt;blockquote id='inheritance'&gt;
+    Q: Does Ruby have a better inheritance system than Python?
+    &lt;br /&gt;
+    A: I find inheritance distasteful. That's like asking me whether I would rather eat grasshoppers or tree bark.
+    &lt;cite&gt;
+      Gary Bernhardt
+    &lt;/cite&gt;
+  &lt;/blockquote&gt;
+  &lt;div class='prose'&gt;
+    &lt;p&gt;My perspective on Ruby was rocked last weekend at &lt;a href="http://www.seapig.org/NWPD10"&gt;Northwest
+    Python Day&lt;/a&gt; in Seattle.&lt;/p&gt;
+    &lt;p&gt;Compared to other programming languages, Python and Ruby are so
+    similar that hearing arguments between them is like trying to figure
+    out which identical twin is more handsome.&lt;/p&gt;
+    &lt;p&gt;But there are differences, and not only in the languages! The
+    Seattle Python community represented there was almost painfully
+    polite. People sat silently for 3-5 minutes between talks while
+    the speaker plugged in to the projector. I rudely whispered to
+    my neighbor, eager to discuss the ideas presented.&lt;/p&gt;
+    &lt;p&gt;During the talks, people mostly sat and listened to the
+    speaker. Many Ruby conferences in the &lt;span class="caps"&gt;USA&lt;/span&gt; are half full of
+    hackers with laptops open, coding away at a project and jeering
+    the speaker over &lt;acronym title="Internet Relay Chat"&gt;&lt;span class="caps"&gt;IRC&lt;/span&gt;&lt;/acronym&gt;. Not here.&lt;/p&gt;
+    &lt;p&gt;I later learned that this may be an attribute unique to Seattle
+    Python developers. After all, we&amp;#8217;re the city that gave the world
+    the &lt;a href="http://www.seattleweekly.com/columns/284118/2009/"&gt;Uptight
+    Seattleite&lt;/a&gt;
+    and where drivers with the right-of-way stop to let cyclists
+    turn left in front of them.&lt;/p&gt;
+    &lt;h2&gt;&lt;em&gt;Python vs. Ruby, A Battle to the Death&lt;/em&gt;&lt;/h2&gt;
+    &lt;p&gt;The main attraction (and last presentation) was from my friend
+    Gary Bernhardt&lt;sup class="footnote"&gt;&lt;a href="#fn1"&gt;1&lt;/a&gt;&lt;/sup&gt;. Gary spent a few months contracting on a
+    Rails project for four hours in the morning and a Django project
+    for four hours in the afternoon. So when he speaks of either,
+    it&amp;#8217;s not in ignorance.&lt;/p&gt;
+    &lt;p&gt;At the end, I couldn&amp;#8217;t find a single criticism of Ruby that I
+    disagreed with. I &lt;em&gt;did&lt;/em&gt; pick up a new appreciation for unique
+    features of the Ruby language that I previously took for
+    granted.&lt;/p&gt;
+    &lt;h3&gt;Matz Idolizes Larry Wall!&lt;/h3&gt;
+    &lt;p&gt;There was an audible gasp from the audience when Gary posted a
+    slide with this quote from Matz:&lt;/p&gt;
+    &lt;blockquote&gt;
+    &lt;p&gt;Ruby inherited the Perl philosophy of having more
+    than one way to do the same thing. I inherited that philosophy
+    from Larry Wall, who is my hero actually.&lt;sup class="footnote"&gt;&lt;a href="#fn2"&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+    &lt;/blockquote&gt;
+    &lt;p&gt;I&amp;#8217;m not sure if the shock was from hearing someone embrace
+    &lt;acronym title="There is more than one way to do it"&gt;&lt;span class="caps"&gt;TIMTOWTDI&lt;/span&gt;&lt;/acronym&gt; or from learning
+    that someone considers Larry Wall to be a hero.&lt;/p&gt;
+    &lt;p&gt;If you open a &lt;code&gt;python&lt;/code&gt; prompt and type&lt;/p&gt;
+    &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;this&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;p&gt;you&amp;#8217;ll see the &lt;em&gt;Zen of Python&lt;/em&gt;, 19 guidelines that Python
+    programmers live by. One is &amp;#8220;There should be one&amp;#8212;and preferably
+    only one&amp;#8212;obvious way to do it.&amp;#8221;&lt;/p&gt;
+    &lt;p&gt;I &lt;em&gt;do&lt;/em&gt; appreciate that Ruby is flexible enough to be used in
+    many ways. That&amp;#8217;s what makes the creativity and richness of Ruby
+    libraries like Hpricot and Rake possible.&lt;/p&gt;
+    &lt;h3&gt;Parentheses Are Optional!&lt;/h3&gt;
+    &lt;p&gt;Gary pointed out that in most languages, appending parentheses
+    to a variable that references a function, calls the function.&lt;/p&gt;
+    &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;my_method&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Proc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;.&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="c1"&gt;# ERROR: You can&amp;#39;t do this in Ruby&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;my_method&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;p&gt;In Ruby, parentheses are a vestigial appendage. You could write
+    an entire Ruby application without parentheses (and some
+    do!). To Python developers, this is shameful.&lt;sup class="footnote"&gt;&lt;a href="#fn3"&gt;3&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+    &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;# In Ruby, you must use the call method&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;my_method&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;call&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;p&gt;I&amp;#8217;m on the line here. I &lt;em&gt;always&lt;/em&gt; use parentheses when defining
+    methods, but use them infrequently when calling methods.&lt;/p&gt;
+    &lt;p&gt;One&amp;#8217;s aesthetic reaction to the following code snippets
+    distinguishes the Rubyist from the Pythonista:&lt;/p&gt;
+    &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kp"&gt;attr_accessor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:title&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;:slug&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;:body&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;belongs_to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:article&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;before_save&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:encrypt_password&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/articles&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;haml&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:article&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;p&gt;And yet our repulsion at too many parentheses contrasts with
+    Lisp&amp;#8217;s influence on Ruby (which will be mentioned later).&lt;/p&gt;
+    &lt;h3&gt;They Monkey-Patch Object!&lt;/h3&gt;
+    &lt;p&gt;It&amp;#8217;s well known that Pythonistas abhor monkey patching,
+    a.k.a. duck punching,&lt;sup class="footnote"&gt;&lt;a href="#fn4"&gt;4&lt;/a&gt;&lt;/sup&gt; i.e. adding methods to existing classes.&lt;/p&gt;
+    &lt;p&gt;They have a point. You can do a lot of damage in a few
+    lines. Previous versions of ActiveRecord monkey-patched
+    &lt;code&gt;Logger&lt;/code&gt;, making it almost unusable for other applications that
+    expected it to work in the standard way (it now behaves more civilly).&lt;/p&gt;
+    &lt;p&gt;But without monkey patching, you can&amp;#8217;t insert &lt;code&gt;should&lt;/code&gt; and
+    &lt;code&gt;should_not&lt;/code&gt; into &lt;code&gt;Object&lt;/code&gt;:&lt;/p&gt;
+    &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;describe&lt;/span&gt; &lt;span class="no"&gt;MySum&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;it&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;performs a sum&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;&amp;#x000A;    &lt;span class="n"&gt;sum&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;MyClass&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;    &lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;should&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;p&gt;So Python can&amp;#8217;t implement the smooth syntax of RSpec.&lt;/p&gt;
+    &lt;h3&gt;Namespaces Run Amok!&lt;/h3&gt;
+    &lt;p&gt;The last line of the &lt;em&gt;Zen of Python&lt;/em&gt; is&lt;/p&gt;
+    &lt;blockquote&gt;
+    &lt;p&gt;Namespaces are one honking great idea &amp;#8212; let&amp;#8217;s do more of those!&lt;/p&gt;
+    &lt;/blockquote&gt;
+    &lt;p&gt;Python&amp;#8217;s &lt;code&gt;import&lt;/code&gt; statement gives you a high level of control
+    over what code you&amp;#8217;re bringing in to your application.&lt;/p&gt;
+    &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;django.db&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;models&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;p&gt;In contrast, a Ruby &lt;code&gt;require&lt;/code&gt; often slurps in other classes that
+    seem entirely unrelated to the code you requested.&lt;/p&gt;
+    &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;active_record&amp;#39;&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# =&amp;gt; ActiveSupport is now in the global namespace&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+    &lt;p&gt;Having more control over the global namespace would be useful,
+    but it seems to me that it would require a re-architecting of
+    nearly the entire Ruby language.&lt;/p&gt;
+    &lt;h3&gt;Can I Have A Chainsaw Without So Much Lisp In It&lt;/h3&gt;
+    &lt;p&gt;My favorite quote of the whole presentation:&lt;/p&gt;
+    &lt;blockquote&gt;
+    &lt;p&gt;Ruby takes full advantage of the Lisp chainsaw.&lt;/p&gt;
+    &lt;/blockquote&gt;
+    &lt;p&gt;Can I have that on a t-shirt?&lt;sup class="footnote"&gt;&lt;a href="#fn5"&gt;5&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+    &lt;p&gt;Python has no comparable equivalent to Ruby&amp;#8217;s &lt;code&gt;do end&lt;/code&gt;
+    block. Python lambdas are limited to one line and can&amp;#8217;t
+    contain statements (for, if, def, etc.). Which leaves me
+    wondering, what&amp;#8217;s the point?&lt;/p&gt;
+    &lt;p&gt;Without powerful blocks and lambdas, you can&amp;#8217;t have Rake. You
+    can&amp;#8217;t have RSpec. You can&amp;#8217;t have Sinatra&amp;#8217;s clear &lt;span class="caps"&gt;REST&lt;/span&gt; syntax.&lt;/p&gt;
+    &lt;p&gt;Without &lt;code&gt;yield&lt;/code&gt;, you can&amp;#8217;t have
+    &lt;a href="http://www.flickr.com/photos/toolmantim/772025003/"&gt;RailsCamp&lt;/a&gt;.&lt;/p&gt;
+    &lt;p&gt;So the very features that make Ruby complicated to parse and
+    potentially Perlish are the same features that can make it
+    incredibly descriptive and flexible.&lt;/p&gt;
+    &lt;p&gt;Not to mention the free Lisp chainsaw without all the
+    parentheses!&lt;sup class="footnote"&gt;&lt;a href="#fn6"&gt;6&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='column footnotes'&gt;
+  &lt;p&gt;A &lt;a href="http://news.ycombinator.com/item?id=1097723"&gt;Hacker News&lt;/a&gt; discussion about this article has over 200 comments &lt;a href="http://news.ycombinator.com/item?id=1097723"&gt;here&lt;/a&gt;.&lt;/p&gt;
+  &lt;p class="footnote" id="fn1"&gt;&lt;sup&gt;1&lt;/sup&gt; Gary blogs at &lt;a href="http://blog.extracheese.org/"&gt;blog.extracheese.org&lt;/a&gt; and recently posted the &lt;a href="http://blog.extracheese.org/2010/02/python-vs-ruby-a-battle-to-the-death.html"&gt;audio and slides&lt;/a&gt; of the talk.&lt;/p&gt;
+  &lt;p class="footnote" id="fn2"&gt;&lt;sup&gt;2&lt;/sup&gt; From an interview at &lt;a href="http://www.artima.com/intv/rubyP.html"&gt;Artima&lt;/a&gt;&lt;/p&gt;
+  &lt;p class="footnote" id="fn3"&gt;&lt;sup&gt;3&lt;/sup&gt; You can also call a Ruby proc with square brackets, but the crowd found that even more revolting.&lt;/p&gt;
+  &lt;p class="footnote" id="fn4"&gt;&lt;sup&gt;4&lt;/sup&gt; Wikipedia on &lt;a href="http://en.wikipedia.org/wiki/Duck_punching"&gt;duck punching&lt;/a&gt;&lt;/p&gt;
+  &lt;p class="footnote" id="fn5"&gt;&lt;sup&gt;5&lt;/sup&gt; Or just &lt;em&gt;Lisp Chainsaw Massacre&lt;/em&gt;. Apparently this is a reference to Perl as a &amp;#8220;Swiss army chainsaw.&amp;#8221;&lt;/p&gt;
+  &lt;p class="footnote" id="fn6"&gt;&lt;sup&gt;6&lt;/sup&gt; Personally, I don&amp;#8217;t mind the parentheses. They can be rather comforting like a pillow.&lt;/p&gt;
+&lt;/div&gt;
+</content>
+    <published>Wed Feb 03 07:00:00 +0000 2010</published>
+  </entry>
+  <entry>
+    <title>Live Coding Rails 3 Upgrade</title>
+    <link type="text/html" rel="alternate" href="http://blog.peepcode.com/tutorials/2010/live-coding-rails-3-upgrade"/>
+    <id>tag:blog.peepcode.com,2010-02-01:/tutorials/2010/live-coding-rails-3-upgrade</id>
+    <content type="html">&lt;p&gt;&lt;strong&gt;This article is heavily styled and is best viewed at &lt;a href="http://blog.peepcode.com/tutorials/2010/live-coding-rails-3-upgrade"&gt;PeepCode&lt;/a&gt;!&lt;/strong&gt;&lt;/p&gt;&lt;div class='column article'&gt;
+  &lt;div id='history-graph'&gt;&lt;/div&gt;
+  &lt;p class='caption'&gt;
+    Rails release dates plotted with SVG.
+    Javascript by Geoffrey Grosenbach (using
+    &lt;a href='http://raphaeljs.com/'&gt;
+      RaphaelJS
+    &lt;/a&gt;
+    ). Data from
+    &lt;a href='http://afreshcup.com/home/2008/11/1/rails-release-dates.html'&gt;
+      Mike Gunderloy.
+    &lt;/a&gt;
+  &lt;/p&gt;
+  &lt;div class='prose'&gt;
+    &lt;p class="movie-link small"&gt;&lt;strong&gt;Free Screencast:&lt;/strong&gt; 
+    &lt;a href="http://peepcode.com/system/uploads/2010/peepcode-free-004-live-coding-rails-3-upgrade.mov"&gt;Desktop&lt;/a&gt; 
+    &lt;a href="http://peepcode.com/system/uploads/2010/peepcode-free-004-live-coding-rails-3-upgrade.m4v"&gt;iPod/Apple TV&lt;/a&gt; 
+    &lt;/p&gt;
+    &lt;p class="caption warning"&gt;&lt;strong&gt;&lt;span class="caps"&gt;NOTE&lt;/span&gt;&lt;/strong&gt; This screencast covers an unreleased
+    version of Rails 3 run from the source. Rails 3 beta will be
+    released
+    &lt;a href="http://github.com/rails/rails/commit/79817aa9e7fa7c207868ca56ca8bbd0ee5303d81"&gt;soon&lt;/a&gt;. We&amp;#8217;ll
+    update the screencast after the beta has been officially
+    released.&lt;/p&gt;
+    &lt;p&gt;For several months people have wondered, &amp;#8220;Where can I download a
+    video that features a developer stumbling through an upgrade of a
+    Rails 2 app to Rails 3?&amp;#8221;&lt;/p&gt;
+    &lt;p&gt;I&amp;#8217;m proud to say that an answer is now available!&lt;/p&gt;
+    &lt;p&gt;In only 25 minutes, I convert my &lt;a href="http://news.peepcode.com/"&gt;news screenshot
+    site&lt;/a&gt; from Rails 2.x to Rails 3
+    (prerelease, from source).&lt;/p&gt;
+    &lt;p&gt;It features the newest bundler (0.9.0.pre), Jeremy McAnally&amp;#8217;s
+    rails-upgrade script, new routes, Arel-based ActiveRecord
+    queries, and more.&lt;/p&gt;
+    &lt;p&gt;Stay tuned for the explosions at the end!&lt;/p&gt;
+    &lt;h3&gt;Resources&lt;/h3&gt;
+    &lt;ul&gt;
+    	&lt;li&gt;&lt;a href="http://github.com/rails/rails"&gt;Rails source&lt;/a&gt;&lt;/li&gt;
+    	&lt;li&gt;&lt;a href="http://omgbloglol.com/post/359147788/rails-upgrade-automating-a-portion-of-the-rails-3"&gt;rails-upgrade script&lt;/a&gt;&lt;/li&gt;
+    	&lt;li&gt;&lt;a href="http://github.com/rails/rails_upgrade"&gt;Rails upgrade rake task&lt;/a&gt;&lt;/li&gt;
+    	&lt;li&gt;&lt;a href="http://m.onkey.org/2010/1/22/active-record-query-interface"&gt;ActiveRecord query interface in Rails 3&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</content>
+    <published>Mon Feb 01 12:00:00 +0000 2010</published>
+    <enclosure type="video/x-m4v" length="73153858" url="http://peepcode.com/system/uploads/2010/peepcode-free-004-live-coding-rails-3-upgrade.m4v"/>
+  </entry>
+  <entry>
+    <title>Nginx Development Script for Passenger</title>
+    <link type="text/html" rel="alternate" href="http://blog.peepcode.com/tutorials/2010/nginx-passenger-script"/>
+    <id>tag:blog.peepcode.com,2010-01-12:/tutorials/2010/nginx-passenger-script</id>
+    <content type="html">&lt;p&gt;&lt;strong&gt;This article is heavily styled and is best viewed at &lt;a href="http://blog.peepcode.com/tutorials/2010/nginx-passenger-script"&gt;PeepCode&lt;/a&gt;!&lt;/strong&gt;&lt;/p&gt;&lt;div class='column article'&gt;
+  &lt;p class="movie-link small"&gt;&lt;strong&gt;Free Screencast:&lt;/strong&gt; 
+  &lt;a href="http://peepcode.com/system/uploads/2010/peepcode-free-003-nginx-passenger-script.mov"&gt;Desktop&lt;/a&gt; 
+  &lt;a href="http://peepcode.com/system/uploads/2010/peepcode-free-003-nginx-passenger-script.m4v"&gt;iPod/Apple TV&lt;/a&gt; 
+  &lt;/p&gt;
+  &lt;p&gt;Like most Rails developers, I incessantly tweak my development environment in pursuit of Nirvana. But like biological evolution, it&amp;#8217;s not always an upward trend.&lt;/p&gt;
+  &lt;p&gt;I recently jumped onto the Unicorn&lt;sup class="footnote"&gt;&lt;a href="#fn1"&gt;1&lt;/a&gt;&lt;/sup&gt; bandwagon. It starts quickly
+  and subjectively serves pages faster even in development (as does
+  every technical modification powered by hope). But it can&amp;#8217;t
+  compete with Phusion Passenger when serving multiple assets
+  simultaneously&lt;sup class="footnote"&gt;&lt;a href="#fn2"&gt;2&lt;/a&gt;&lt;/sup&gt;. Since many of my applications use dynamically
+  generated graphics (or at least dynamic &lt;span class="caps"&gt;CSS&lt;/span&gt; with &lt;span class="caps"&gt;SASS&lt;/span&gt;), this can
+  make a big difference.&lt;/p&gt;
+  &lt;p&gt;But even with the minimal configuration needed to create a new
+  Passenger app, it&amp;#8217;s inconvenient for spontaneous apps or small
+  demos. If I want to try out a Rails 3 application with Passenger,
+  I don&amp;#8217;t want to configure a new virtual host for just a few
+  minutes of experimentation.&lt;/p&gt;
+  &lt;p&gt;At RailsCamp 6, &lt;a href="http://peepcode.com/products/thinking-sphinx-pdf"&gt;PeepCode
+  author&lt;/a&gt; Pat Allan
+  showed a beautiful solution. It&amp;#8217;s a script that starts Nginx from
+  any directory&lt;sup class="footnote"&gt;&lt;a href="#fn3"&gt;3&lt;/a&gt;&lt;/sup&gt; using a shared configuration file. I modified it
+  ever so slightly and posted a screencast above with a walkthrough.&lt;/p&gt;
+  &lt;p&gt;I store the script in my &lt;code&gt;~/bin&lt;/code&gt; directory so it can be called
+  from any location:&lt;/p&gt;
+  &lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2010/nginx-passenger-script/nginx.sh"&gt;nginx.sh&lt;/a&gt;&lt;/p&gt;&lt;p&gt;I use the following configuration file, stored in my source-controlled
+  dotfiles directory.&lt;/p&gt;
+  &lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2010/nginx-passenger-script/nginx-dir.conf"&gt;nginx-dir.conf&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Now that I&amp;#8217;m back with Passenger for development, both visual
+  modifications and backend code tweaks happen much faster. And I
+  can fire up the server in any directory.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column footnotes'&gt;
+  &lt;p class="footnote" id="fn1"&gt;&lt;sup&gt;1&lt;/sup&gt; &lt;a href="http://unicorn.bogomips.org/"&gt;Unicorn&lt;/a&gt; is a close-to-the metal Unix-based webserver written in Ruby.&lt;/p&gt;
+  &lt;p class="footnote" id="fn2"&gt;&lt;sup&gt;2&lt;/sup&gt; &lt;a href="http://modrails.com/"&gt;Phusion Passenger&lt;/a&gt; for Apache or Nginx manages multiple servers when more requests come in than can be handled. The result is faster delivery of assets to the client without the need to manually manage application server instances.&lt;/p&gt;
+  &lt;p class="footnote" id="fn3"&gt;&lt;sup&gt;3&lt;/sup&gt; &lt;a href="http://freelancing-gods.com/posts/script_nginx"&gt;Pat&amp;#8217;s original article&lt;/a&gt; shows how to build Nginx from source.&lt;/p&gt;
+&lt;/div&gt;
+</content>
+    <published>Tue Jan 12 12:00:00 +0000 2010</published>
+    <enclosure type="video/x-m4v" length="26235070" url="http://peepcode.com/system/uploads/2010/peepcode-free-003-nginx-passenger-script.m4v"/>
+  </entry>
+  <entry>
+    <title>jQTouch Cheat Sheet</title>
+    <link type="text/html" rel="alternate" href="http://blog.peepcode.com/tutorials/2009/jqtouch-cheat-sheet"/>
+    <id>tag:blog.peepcode.com,2009-12-30:/tutorials/2009/jqtouch-cheat-sheet</id>
+    <content type="html">&lt;p&gt;&lt;strong&gt;This article is heavily styled and is best viewed at &lt;a href="http://blog.peepcode.com/tutorials/2009/jqtouch-cheat-sheet"&gt;PeepCode&lt;/a&gt;!&lt;/strong&gt;&lt;/p&gt;&lt;div class='column article'&gt;
+  &lt;dl class='callout' id='markup'&gt;
+    &lt;dt&gt;Markup&lt;/dt&gt;
+    &lt;dd&gt;The core of a &lt;a href="http://www.jqtouch.com/"&gt;jQTouch&lt;/a&gt; application is the markup. Although you can use any HTML or CSS that you like, following conventions for class names and element structure offloads most of the work to the framework.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='title'&gt;
+    &lt;dt&gt;h1&lt;/dt&gt;
+    &lt;dd&gt;A single HTML document contains many pages, each with an optional title inside the toolbar.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='toolbar'&gt;
+    &lt;dt&gt;div.toolbar&lt;/dt&gt;
+    &lt;dd&gt;The toolbar works as a navigation bar with a title, back button, and accessory button.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='back-button'&gt;
+    &lt;dt&gt;a.back&lt;/dt&gt;
+    &lt;dd&gt;Just like native apps, pages are navigated in a stack. jQTouch handles backward navigation and animation if you include a back link in the toolbar.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='custom-html'&gt;
+    &lt;dt&gt;Custom HTML&lt;/dt&gt;
+    &lt;dd&gt;Although jQTouch includes styling for many elements, you don't have to use them! Style up your own interfaces with HTML and CSS.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='unordered-list'&gt;
+    &lt;dt&gt;ul&lt;/dt&gt;
+    &lt;dd&gt;Lists make great menus or table-like displays. Add the rounded, plastic or edgetoedge classes to an unordered list for different styles.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='icons'&gt;
+    &lt;dt&gt;Images&lt;/dt&gt;
+    &lt;dd&gt;Stock and freeware icons are easy to use and can make your app look great. A 12px square icon works best. Try &lt;a href="http://helveticons.ch/"&gt;Helveticons&lt;/a&gt;, &lt;a href="http://glyphish.com/"&gt;Glyphish&lt;/a&gt; or &lt;a href="http://eddit.com/shop/"&gt;Eddit&lt;/a&gt;.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='accessory-view'&gt;
+    &lt;dt&gt;li.arrow &amp; li.forward&lt;/dt&gt;
+    &lt;dd&gt;Themes include classes for indicating the clickability of list items.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='javascript-callbacks'&gt;
+    &lt;dt&gt;JavaScript Callbacks&lt;/dt&gt;
+    &lt;dd&gt;Use jQuery to attach to the &lt;code&gt;tap&lt;/code&gt; event. Or bind to &lt;code&gt;pageAnimationEnd&lt;/code&gt; to add your own custom page behavior.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='subtitle'&gt;
+    &lt;dt&gt;h2&lt;/dt&gt;
+    &lt;dd&gt;Subtitles separate sections.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='individual'&gt;
+    &lt;dt&gt;ul.individual&lt;/dt&gt;
+    &lt;dd&gt;This class styles unordered lists as half-width buttons.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='info'&gt;
+    &lt;dt&gt;div.info&lt;/dt&gt;
+    &lt;dd&gt;A styled div for auxiliary notes.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;div id='buy'&gt;
+    &lt;h2&gt;See the Movie!&lt;/h2&gt;
+    &lt;p class='small'&gt;
+      70 minute screencast.
+      &lt;br /&gt;
+      Only &lt;sup&gt;$&lt;/sup&gt;9!
+      &lt;a href='https://peepcode.com/products/jqtouch'&gt;
+        More info&amp;hellip;
+      &lt;/a&gt;
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</content>
+    <published>Wed Dec 30 18:00:00 +0000 2009</published>
+  </entry>
+  <entry>
+    <title>Ruby, Emacs &amp; Flog Metrics</title>
+    <link type="text/html" rel="alternate" href="http://blog.peepcode.com/tutorials/2009/ruby-emacs-flog"/>
+    <id>tag:blog.peepcode.com,2009-12-28:/tutorials/2009/ruby-emacs-flog</id>
+    <content type="html">&lt;p&gt;&lt;strong&gt;This article is heavily styled and is best viewed at &lt;a href="http://blog.peepcode.com/tutorials/2009/ruby-emacs-flog"&gt;PeepCode&lt;/a&gt;!&lt;/strong&gt;&lt;/p&gt;&lt;div class='column article'&gt;
+  &lt;p class="movie-link small"&gt;&lt;strong&gt;Free Screencast:&lt;/strong&gt; 
+  &lt;a href="http://peepcode.com/system/uploads/2009/peepcode-free-002-ruby-emacs-flog.mov"&gt;Desktop&lt;/a&gt; 
+  &lt;a href="http://peepcode.com/system/uploads/2009/peepcode-free-002-ruby-emacs-flog.m4v"&gt;iPod/Apple TV&lt;/a&gt; 
+  &lt;/p&gt;
+  &lt;div id='buy'&gt;
+    &lt;h2&gt;Learn Emacs!&lt;/h2&gt;
+    &lt;p class='small'&gt;
+      One hour screencast.
+      &lt;br /&gt;
+      Only &lt;sup&gt;$&lt;/sup&gt;9!
+      &lt;a href='https://peepcode.com/products/meet-emacs'&gt;
+        More info&amp;hellip;
+      &lt;/a&gt;
+    &lt;/p&gt;
+  &lt;/div&gt;
+  &lt;dl class='callout' id='title'&gt;
+    &lt;dt&gt;Summary&lt;/dt&gt;
+    &lt;dd&gt;Flog metrics are often difficult to understand. The numbers can't be compared between projects or even classes. This editor enhancement helps by showing the flog score in the left column as you code.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='rasterize_and_cache_heading'&gt;
+    &lt;dt&gt;Flog Score in the Column&lt;/dt&gt;
+    &lt;dd&gt;This method has a flog score of 22 which can be seen in the column. It's more meaningful if compared to the scores of other methods in the same class. Larger numbers indicate greater complexity. If one method has a score that is significantly larger than others, it should probably be broken apart into several methods.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='conditionals'&gt;
+    &lt;dt&gt;Repeated OR&lt;/dt&gt;
+    &lt;dd&gt;The method repeats a conditional inline many times in the options. Refactoring the optional default value into the metadata method simplifies it and reduces the flog score in real time. (See the screencast linked above.)&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='requirements'&gt;
+    &lt;dt&gt;Requirements&lt;/dt&gt;
+    &lt;dd&gt;
+      You'll need
+      &lt;a href='http://blog.zenspider.com/rubysadism/flog/'&gt;
+        flog
+      &lt;/a&gt;
+      (sudo gem install flog). The
+      &lt;a href='http://github.com/seattlerb/flog'&gt;
+        source
+      &lt;/a&gt;
+      to flog is also available in several SCMs.
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='code'&gt;
+    &lt;dt&gt;Code&lt;/dt&gt;
+    &lt;dd&gt;
+      &amp;rarr;
+      &lt;a href='http://github.com/topfunky/emacs-starter-kit/tree/master/vendor/ruby-complexity/'&gt;
+        Get the code
+      &lt;/a&gt;
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl class='callout' id='inspiration'&gt;
+    &lt;dt&gt;Inspiration&lt;/dt&gt;
+    &lt;dd&gt;
+      &lt;a href='http://blog.extracheese.org/'&gt;
+        Gary Bernhardt
+      &lt;/a&gt;
+      wrote the initial Python implementation for Vim and posted a
+      &lt;a href='http://www.vimeo.com/7259161'&gt;
+        screencast
+      &lt;/a&gt;
+      that shows it in action. Ignas Mikalajunas
+      &lt;a href='http://blog.pow.lt/2009/11/27/cyclomatic-complexity-in-emacs/'&gt;
+        ported
+      &lt;/a&gt;
+      it to Emacs. I used numbers instead of colors since flog scores aren't absolute (it would be hard to calibrate numbers to colors).
+    &lt;/dd&gt;
+  &lt;/dl&gt;
+&lt;/div&gt;
+</content>
+    <published>Mon Dec 28 12:00:00 +0000 2009</published>
+    <enclosure type="video/x-m4v" length="7875266" url="http://peepcode.com/system/uploads/2009/peepcode-free-002-ruby-emacs-flog.m4v"/>
+  </entry>
+  <entry>
+    <title>The Expert Javascript Programmer</title>
+    <link type="text/html" rel="alternate" href="http://blog.peepcode.com/tutorials/2009/douglas-crockford-javascript"/>
+    <id>tag:blog.peepcode.com,2009-12-06:/tutorials/2009/douglas-crockford-javascript</id>
+    <content type="html">&lt;p&gt;&lt;strong&gt;This article is heavily styled and is best viewed at &lt;a href="http://blog.peepcode.com/tutorials/2009/douglas-crockford-javascript"&gt;PeepCode&lt;/a&gt;!&lt;/strong&gt;&lt;/p&gt;&lt;div class='column article'&gt;
+  &lt;p&gt;I spent the weekend reading &lt;a href="http://www.crockford.com/"&gt;Douglas Crockford&amp;#8217;s&lt;/a&gt; 
+  essays on Javascript. He was an independent advocate for Javascript back when
+  most programmers hated it. He was responsible for making &lt;span class="caps"&gt;JSON&lt;/span&gt; a
+  standard for data interchange, even between completely different languages.&lt;/p&gt;
+  &lt;p&gt;There are some classic essays in there and it only took a few
+  hours to read all the articles on the front page. You can forgo
+  the 90&amp;#8217;s web design style by using the
+  &lt;a href="http://lab.arc90.com/experiments/readability/"&gt;Readability&lt;/a&gt;
+  bookmarklet either on the desktop or mobile&lt;sup class="footnote"&gt;&lt;a href="#fn1"&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+  &lt;p&gt;I use &lt;code&gt;style: novel, size: large, margin: narrow&lt;/code&gt;.&lt;/p&gt;
+  &lt;p&gt;&lt;img src="/tutorials/2009/douglas-crockford-javascript/readability.png" id="readability-example" title="Readability bookmarklet example" alt="Readability bookmarklet example" /&gt;&lt;/p&gt;
+  &lt;p&gt;If you don&amp;#8217;t use Javascript, you&amp;#8217;ll learn some valuable lessons
+  from a skilled programmer and tech visionary. If you do use Javascript,
+  you&amp;#8217;ll learn a lot about how an enthusiast uses the features and
+  shortcomings of the language to their best effect.&lt;/p&gt;
+  &lt;p&gt;His opinionated decisiveness and surly delivery produce some real chestnuts.&lt;/p&gt;
+  &lt;p&gt;&lt;img src="/tutorials/2009/douglas-crockford-javascript/quote-competence.png" title="Avoid conventions that demonstrate a lack of competence." alt="Avoid conventions that demonstrate a lack of competence." /&gt;&lt;/p&gt;
+  &lt;p&gt;It helps to periodically remind oneself of these clear truths.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column article'&gt;
+  &lt;p&gt;At least one other clear truth emerged while reading. It surprised
+  me that many of his style recommendations were precautions against
+  elementary programming mistakes. For example, he recommends that
+  Javascript programmers always use brackets with an &lt;code&gt;if&lt;/code&gt;
+  statement even if the body consists of only a single statement.&lt;/p&gt;
+  &lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2009/douglas-crockford-javascript/if.js"&gt;if.js&lt;/a&gt;&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;// Possible error&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt; &lt;span class="o"&gt;===&lt;/span&gt; &lt;span class="nx"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;  &lt;span class="nx"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;d&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&amp;#x000A;  &lt;span class="nx"&gt;e&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;f&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="c1"&gt;// Recommended&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt; &lt;span class="o"&gt;===&lt;/span&gt; &lt;span class="nx"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&amp;#x000A;  &lt;span class="nx"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;d&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&amp;#x000A;&lt;span class="p"&gt;}&lt;/span&gt;&amp;#x000A;&lt;span class="nx"&gt;e&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;f&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;
+  &lt;p&gt;I don&amp;#8217;t think I&amp;#8217;ve ever accidentally misused a one-line &lt;code&gt;if&lt;/code&gt;
+  statement. A grizzled verteran like Crockford would certainly
+  never make that mistake either.&lt;/p&gt;
+  &lt;p&gt;&lt;img src="/tutorials/2009/douglas-crockford-javascript/quote-tao-of-programming.png" title="Even a perfect program has bugs." alt="Even a perfect program has bugs." /&gt;&lt;/p&gt;
+  &lt;p&gt;My epiphany was recognizing the contrast between two ways of
+  approaching a programming session. One says &amp;#8220;I&amp;#8217;m experienced and I
+  can trust myself to write flawless code.&amp;#8221; The other says &amp;#8220;I&amp;#8217;m
+  likely to make a mistake at some point and will take precautions
+  against errors.&amp;#8221;&lt;/p&gt;
+  &lt;p&gt;Novices in many fields look at experts and rightly observe that
+  experts don&amp;#8217;t use the same training wheels that novices do. The
+  (erroneous) conclusion is that experts don&amp;#8217;t need &lt;em&gt;any&lt;/em&gt;.&lt;/p&gt;
+  &lt;p&gt;But in reality, experts often use more aids than novices. The
+  skilled craftsman doesn&amp;#8217;t see these as insults to one&amp;#8217;s
+  intelligence but as a tool for achieving perfection.&lt;/p&gt;
+  &lt;p&gt;Skilled woodworkers build a jig before cutting a piece of wood.&lt;/p&gt;
+  &lt;p&gt;Graphic designers start a layout by drawing a grid to contain the
+  contents.&lt;/p&gt;
+  &lt;p&gt;Professional vert skateboarders wear helmets.&lt;/p&gt;
+  &lt;p&gt;And experienced programmers adopt habits that guard against
+  elementary errors.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='column footnotes'&gt;
+  &lt;p class="footnote" id="fn1"&gt;&lt;sup&gt;1&lt;/sup&gt; Unfortunately, the Readability bookmarklet also changes the spacing on some code samples in the essays.&lt;/p&gt;
+&lt;/div&gt;
+</content>
+    <published>Sun Dec 06 22:00:00 +0000 2009</published>
+  </entry>
+  <entry>
+    <title>The Sound of No Command</title>
+    <link type="text/html" rel="alternate" href="http://blog.peepcode.com/tutorials/2009/shell-method-missing"/>
+    <id>tag:blog.peepcode.com,2009-12-03:/tutorials/2009/shell-method-missing</id>
+    <content type="html">&lt;p&gt;&lt;strong&gt;This article is heavily styled and is best viewed at &lt;a href="http://blog.peepcode.com/tutorials/2009/shell-method-missing"&gt;PeepCode&lt;/a&gt;!&lt;/strong&gt;&lt;/p&gt;&lt;p class="movie-link small"&gt;&lt;strong&gt;Free Screencast:&lt;/strong&gt; 
+&lt;a href="http://peepcode.com/system/uploads/2009/peepcode-free-001-shell-method-missing.mov"&gt;Desktop&lt;/a&gt; 
+&lt;a href="http://peepcode.com/system/uploads/2009/peepcode-free-001-shell-method-missing.m4v"&gt;iPod/Apple TV&lt;/a&gt; 
+&lt;/p&gt;
+&lt;div id="buy"&gt;&lt;h2&gt;Learn the Shell&lt;/h2&gt;&lt;p class="small"&gt;Basic &amp;amp; Advanced&lt;br /&gt;Only &lt;sup&gt;$&lt;/sup&gt;9!&lt;a href="http://peepcode.com/screencasts/unix"&gt;More info&amp;hellip;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;p&gt;On the last night of &lt;a href="http://railscamps.com"&gt;RailsCamp 6&lt;/a&gt; I hosted a
+show and tell of shell commands.&lt;/p&gt;
+&lt;p&gt;I always love seeing what aliases, functions, and techniques other
+people use. And I hope that people will find something useful from
+mine.&lt;/p&gt;
+&lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2009/shell-method-missing/drnic-inputrc.sh"&gt;drnic-inputrc.sh&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Earlier in the weekend, Dr. Nic showed me an &lt;code&gt;inputrc&lt;/code&gt; he uses with
+bash that searches his command history like &lt;code&gt;command-r&lt;/code&gt; but uses the
+up and down arrow keys. You just start typing part of a command, then
+hit up-arrow and it shows the previous command that starts with the
+string.&lt;/p&gt;
+&lt;p&gt;&lt;del&gt;Unfortunately, I couldn&amp;#8217;t get it to work with zsh.&lt;/del&gt; Alexandros
+Podaras sent in a &lt;a href="http://gist.github.com/252127"&gt;zsh-compatible version&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;It only searches the beginning of commands, not the entire command
+including arguments.&lt;/p&gt;
+&lt;h2&gt;Bo&amp;#8217;s Method Missing&lt;/h2&gt;
+&lt;p class="highlight-file-link small"&gt;&lt;a href="http://github.com/bjeanes/dot-files/blob/master/fish/bin/fish_method_missing"&gt;fish_method_missing&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href="http://bjeanes.com/2009/10/07/using-fish-shells-event-system-to-behave-like-method-missing"&gt;Bo Jeanes&lt;/a&gt; took it up a notch with a &lt;code&gt;method_missing&lt;/code&gt;-type handler for the &lt;a href="http://fishshell.org/"&gt;fish shell&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;He can do things like paste a bare &lt;span class="caps"&gt;URL&lt;/span&gt; into the terminal and it will
+download the file and untar it for him automatically. Git URLs will be
+cloned automatically. There is also an artificial shortcut for running
+Cucumber stories by typing just the name of the feature file.&lt;/p&gt;
+&lt;p&gt;I discovered that both zsh and bash have similar capabilities! Oddly, it only works with zsh on Snow Leopard, not Leopard OG.&lt;/p&gt;
+&lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2009/shell-method-missing/bash-command-not-found.sh"&gt;bash-command-not-found.sh&lt;/a&gt;&lt;/p&gt;&lt;p&gt;For bash, use the &lt;code&gt;trap&lt;/code&gt; handler and &lt;code&gt;shell_method_missing&lt;/code&gt; script
+found at right.&lt;/p&gt;
+&lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2009/shell-method-missing/shell_method_missing.rb"&gt;shell_method_missing.rb&lt;/a&gt;&lt;/p&gt;&lt;p&gt;For zsh, write a function called &lt;code&gt;command_not_found_handler&lt;/code&gt; that
+calls a custom Ruby script. The Ruby script will try to find the
+intended command and run it.&lt;/p&gt;
+&lt;p class="highlight-file-link small"&gt;&lt;a href="/tutorials/2009/shell-method-missing/command_not_found_handler.sh"&gt;command_not_found_handler.sh&lt;/a&gt;&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# For zsh. Add to your .zshrc&lt;/span&gt;
+&lt;span class="k"&gt;function &lt;/span&gt;command_not_found_handler&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+  ~/bin/shell_method_missing &lt;span class="nv"&gt;$*&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I&amp;#8217;ve modified the &lt;code&gt;shell_method_missing.rb&lt;/code&gt; script to easily clone
+repositories from GitHub. Type the name of a user and the name of a
+project:&lt;/p&gt;
+&lt;pre&gt;% bjeanes dot-files.git
+=&amp;gt; Runs "git clone git://github.com/bjeanes/dot-files.git"&lt;/pre&gt;
+&lt;p&gt;I can also install gems by typing the name and a &lt;code&gt;.gem&lt;/code&gt; suffix.&lt;/p&gt;
+&lt;pre&gt;% haml.gem
+=&amp;gt; Runs "sudo gem install haml"&lt;/pre&gt;
+&lt;p&gt;Currently, my zsh settings intercept &lt;code&gt;git&lt;/code&gt; and &lt;code&gt;http&lt;/code&gt; URLs and don&amp;#8217;t
+pass it onto the &lt;code&gt;command_not_found_handler&lt;/code&gt;. I haven&amp;#8217;t figured out
+how to work around this yet.&lt;/p&gt;
+&lt;p&gt;One could go wild with the possibilities:&lt;/p&gt;
+&lt;ul&gt;
+	&lt;li&gt;Run specs by name&lt;/li&gt;
+	&lt;li&gt;Run rake tasks&lt;/li&gt;
+	&lt;li&gt;Deploy a website by typing &lt;code&gt;staging&lt;/code&gt; or &lt;code&gt;production&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Try it out!&lt;/p&gt;</content>
+    <published>Thu Dec 03 12:00:00 +0000 2009</published>
+    <enclosure type="video/x-m4v" length="7650025" url="http://peepcode.com/system/uploads/2009/peepcode-free-001-shell-method-missing.m4v"/>
+  </entry>
+</feed>
