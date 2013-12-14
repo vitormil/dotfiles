@@ -1,0 +1,3 @@
+ln -s ~/dotfiles/vim ~/.vim
+
+- work in progress...
