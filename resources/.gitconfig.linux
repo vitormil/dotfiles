@@ -1,8 +1,6 @@
 [user]
   name = Vitor Oliveira
   email = vitormil@gmail.com
-[credential]
-  helper = osxkeychain
 [alias]
   st = status
   ci = commit
