@@ -1,0 +1,15 @@
+--type-add=css=.sass,.less,.scss
+--type-add=ruby=.rake,.rsel,.builder,.thor
+--type-add=js=.js.erb,.coffee
+--ignore-dir=vendor
+--ignore-dir=log
+--ignore-dir=tmp
+--ignore-dir=doc
+--ignore-dir=coverage
+--ignore-dir=spec/cassettes
+--ignore-dir=features/cassettes
+--smart-case
+--sort-files
+--color
+--follow
+--group
