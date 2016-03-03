@@ -1,6 +1,9 @@
-ln -s ~/dotfiles/resources/.githelpers         ~/.githelpers
-ln -s ~/dotfiles/resources/.gitignore          ~/.gitignore
-ln -s ~/dotfiles/resources/.gitconfig.ubuntu   ~/.gitconfig
-ln -s ~/dotfiles/resources/.gitk               ~/.gitk
-ln -s ~/dotfiles/resources/.railsrc            ~/.railsrc
-ln -s ~/dotfiles/resources/.gemrc              ~/.gemrc
+cp ../resources/.githelpers         ~/.githelpers
+cp ../resources/.gitignore          ~/.gitignore
+cp ../resources/.gitconfig.ubuntu   ~/.gitconfig
+cp ../resources/.gitk               ~/.gitk
+cp ../resources/.railsrc            ~/.railsrc
+cp ../resources/.gemrc              ~/.gemrc
+cp ../resources/.tigrc              ~/.tigrc
+cp ../resources/.ackrc              ~/.ackrc
+cp ../resources/.agignore           ~/.agignore

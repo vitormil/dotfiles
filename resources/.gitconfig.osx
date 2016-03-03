@@ -9,21 +9,17 @@
   co = checkout
   di = diff
   dc = diff --cached
+  dt = difftool
   amend = commit --amend
   aa = add --all
-  ff = merge --ff-only
-  pullff = pull --ff-only
-  noff = merge --no-ff
-  fa = fetch --all
-  pom = push origin master
   ds = diff --stat=160,120
-  dh1 = diff HEAD~1
   rr = remote -v
-  b = branch -v
-
-  l = "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+  b = branch
+  bb = branch -v
+  vv = branch -vv
+  fa = fetch --all
 [push]
-  default = matching
+  default = simple
 [color]
   ui = true
   branch = auto
@@ -46,5 +42,3 @@
   tool = Kaleidoscope
 [core]
   excludesfile = ~/.gitignore
-[help]
-  autocorrect = 10
