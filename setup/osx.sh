@@ -6,3 +6,4 @@ ln -s ~/dotfiles/resources/.railsrc            ~/.railsrc
 ln -s ~/dotfiles/resources/.gemrc              ~/.gemrc
 ln -s ~/dotfiles/resources/.tigrc              ~/.tigrc
 ln -s ~/dotfiles/resources/.ackrc              ~/.ackrc
+ln -s ~/dotfiles/resources/.agignore           ~/.agignore

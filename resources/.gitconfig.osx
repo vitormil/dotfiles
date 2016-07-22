@@ -1,7 +1,7 @@
 [user]
   name = Vitor Oliveira
   email = vitormil@gmail.com
-	signingkey = 875405D9
+  signingkey = 875405D9
 [credential]
   helper = osxkeychain
 [alias]
@@ -44,14 +44,8 @@
   tool = Kaleidoscope
 [core]
   excludesfile = ~/.gitignore
-	autocrlf = false
+  autocrlf = false
   safecrlf = warn
-	editor = vim
-[help]
-  autocorrect = 10
-[filter "hawser"]
-  clean = git hawser clean %f
-  smudge = git hawser smudge %f
-  required = true
+  editor = vim
 [commit]
-	gpgsign = true
+  gpgsign = true
