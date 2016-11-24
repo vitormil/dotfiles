@@ -1,4 +1,4 @@
 set line-graphics = yes
 
-set main-view = date:short author:email-user commit-title,overflow:false,refs:true,graph:true
+set main-view = author:email-user commit-title,overflow:false,refs:true,graph:true
 

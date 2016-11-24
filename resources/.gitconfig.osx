@@ -20,6 +20,7 @@
   bb = branch -v
   vv = branch -vv
   fa = fetch --all
+  dummy = commit -m "dummy" --all
 [push]
   default = simple
 [color]
