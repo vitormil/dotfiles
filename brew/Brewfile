@@ -1,0 +1,32 @@
+cask_args appdir: '/Applications'
+
+brew 'stow'
+brew 'git'
+brew 'tig'
+brew 'git-delta'
+
+brew 'node'
+brew 'ruby'
+
+brew 'exa'
+brew 'tree'
+brew 'trash'
+brew 'bat'
+brew 'jq'
+brew 'fd'
+brew 'zenith'
+
+brew 'tmux'
+brew 'neovim'
+
+brew 'wget'
+brew 'httpie'
+brew 'mise'
+brew 'lazydocker'
+brew 'fzf'
+brew 'zoxide'
+
+# Casks
+cask 'font-hack-nerd-font'
+cask 'font-jetbrains-mono-nerd-font'
+cask 'alacritty'

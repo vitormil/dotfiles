@@ -1,0 +1,53 @@
+# By Vitor Oliveira
+
+[colors.primary]
+background = "#1e2a33"
+foreground = "#c0c4cd"
+
+[colors.cursor]
+text = "#1e2a33"
+cursor = "#f2c973"
+
+[colors.line_indicator]
+foreground = "#1e2a33"
+background = "#c0c4cd"
+
+[colors.vi_mode_cursor]
+text = "CellBackground"
+cursor = "#22da6e"
+
+[colors.search.matches]
+foreground = "#000000"
+background = "#f2c973"
+
+[colors.search.focused_match]
+foreground = "CellBackground"
+background = "#ee8e44"
+
+[colors.footer_bar]
+foreground = "#ffffff"
+background = "#1d3b53"
+
+[colors.selection]
+text = "#ffffff"
+background = "#0d486e"
+
+[colors.normal]
+black = "#343f47"
+red = "#db686a"
+green = "#a2c598"
+yellow = "#f2c973"
+blue = "#7197c7"
+magenta = "#bd95c1"
+cyan = "#73b0b1"
+white = "#dddddd"
+
+[colors.bright]
+black = "#4a5963"
+red = "#e27b7d"
+green = "#b4d2ab"
+yellow = "#f5d18b"
+blue = "#86a7d1"
+magenta = "#c6a2cc"
+cyan = "#84c0c1"
+white = "#eeeeee"
