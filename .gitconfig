@@ -37,6 +37,9 @@
   wip = commit -m "wip" --no-verify
   amend = commit --amend
 
+  local-branches = "!git for-each-ref --sort=-committerdate refs/heads/ --format='%(committerdate:relative)|%(authorname)|%(refname:short)' | column -ts '|'"
+  remote-branches = "!git for-each-ref --sort=-committerdate refs/remotes/ --format='%(committerdate:relative)|%(authorname)|%(refname:short)' | column -ts '|'"
+
   fast-log = !git --no-pager log --oneline
   fl = fast-log
 
