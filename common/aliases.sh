@@ -17,6 +17,8 @@ alias ld="lazydocker"
 alias rm="trash"
 alias htop="zenith"
 
+alias j="find . -type d -name 'node_modules' -prune -o -type f -name '*.json' -print | fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}' | xargs fx"
+
 alias ni="npm install"
 alias ns="npm run start"
 
