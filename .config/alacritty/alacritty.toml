@@ -87,6 +87,12 @@ key = "Left"
 mods = "Alt"
 chars = "\u001BB"
 
+# Change Directory: ALT + D
+[[keyboard.bindings]]
+key = "D"
+mods = "Alt"
+chars = "cd **\u0009"
+
 # ############################
 # ## tmux plugins shortcuts ##
 # ############################

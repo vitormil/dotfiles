@@ -1,5 +1,15 @@
 #!/bin/bash
 
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf "$@" --preview 'tree -C {} | head -200' ;;
+    *)            fzf "$@" ;;
+  esac
+}
+
 open_todo() {
   sh ~/dotfiles/custom/open_todo.sh
 }
@@ -18,3 +28,4 @@ todo() {
   sh ~/dotfiles/custom/add_todo.sh "$result"
   open_todo
 }
+
