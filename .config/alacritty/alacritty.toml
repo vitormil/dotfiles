@@ -47,6 +47,7 @@ semantic_escape_chars = ",│`|:\"' ()[]{}<>"
 
 # #########################
 # ## Keyboard navigation ##
+# ## Hex dump: xxd -ps   ##
 # #########################
 
 # HOME
@@ -99,14 +100,14 @@ chars = "cd **\u0009"
 
 # C-K (Pick a sesh)
 [[keyboard.bindings]]
-key = "L"
+key = "S"
 mods = "Super"
 chars = "\u0001\u004b"
 
-# Next session: CMD + Option + L
+# Next session: Option + S
 [[keyboard.bindings]]
-key = "L"
-mods = "Super|Alt"
+key = "S"
+mods = "Alt"
 chars = "\u0001\u0029"
 
 # C-T (Sesh popup)
@@ -127,9 +128,49 @@ key = "c"
 mods = "Super|Shift"
 chars = "\u0001\u0020"
 
+# ##########################
+# ## tmux split shortcuts ##
+# ##########################
+
+# Split window horizontally: Option -
+[[keyboard.bindings]]
+key = "-"
+mods = "Alt"
+chars = "\u0001\u002d"
+
+# Split window vertically: Option /
+[[keyboard.bindings]]
+key = "/"
+mods = "Alt"
+chars = "\u0001\u002f"
+
 # ############################
 # ## better tmux navigation ##
 # ############################
+
+# Next pane: Option + ]
+[[keyboard.bindings]]
+key = "]"
+mods = "Alt"
+chars = "\u0001\u006f"
+
+# Previous pane: Option + [
+[[keyboard.bindings]]
+key = "["
+mods = "Alt"
+chars = "\u0001\u006b"
+
+# Zoom the active pane: Option + z
+[[keyboard.bindings]]
+key = "z"
+mods = "Alt"
+chars = "\u0001\u007a"
+
+# Back to last pane: Option + P
+[[keyboard.bindings]]
+key = "p"
+mods = "Alt"
+chars = "\u0001\u003b"
 
 [[keyboard.bindings]]
 key = "T"
@@ -150,6 +191,10 @@ command = { program = "/opt/homebrew/bin/tmux", args = ["previous-window"] }
 key = "}"
 mods = "Super|Shift"
 command = { program = "/opt/homebrew/bin/tmux", args = ["next-window"] }
+
+# ####################################
+# ## tmux direct navigate to window ##
+# ####################################
 
 [[keyboard.bindings]]
 key = "1"
@@ -195,3 +240,58 @@ chars = "\u0001\u0038"
 key = "9"
 mods = "Super"
 chars = "\u0001\u0039"
+
+# ##################################
+# ## tmux direct navigate to pane ##
+# ##################################
+
+[[keyboard.bindings]]
+key = "1"
+mods = "Alt"
+command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "1"] }
+
+[[keyboard.bindings]]
+key = "2"
+mods = "Alt"
+command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "2"] }
+
+[[keyboard.bindings]]
+key = "3"
+mods = "Alt"
+command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "3"] }
+
+[[keyboard.bindings]]
+key = "4"
+mods = "Alt"
+command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "4"] }
+
+[[keyboard.bindings]]
+key = "5"
+mods = "Alt"
+command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "5"] }
+
+[[keyboard.bindings]]
+key = "6"
+mods = "Alt"
+command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "6"] }
+
+[[keyboard.bindings]]
+key = "7"
+mods = "Alt"
+command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "7"] }
+
+[[keyboard.bindings]]
+key = "8"
+mods = "Alt"
+command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "8"] }
+
+[[keyboard.bindings]]
+key = "9"
+mods = "Alt"
+command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "9"] }
+
+# Show pane numbers: Option 0
+[[keyboard.bindings]]
+key = "0"
+mods = "Alt"
+chars = "\u0001\u0071"
