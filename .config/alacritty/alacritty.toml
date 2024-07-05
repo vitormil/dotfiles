@@ -144,6 +144,27 @@ key = "/"
 mods = "Alt"
 chars = "\u0001\u002f"
 
+# ######################
+# ##  general shortcuts ##
+# ######################
+
+# Show Clock: Super + c
+[[keyboard.bindings]]
+key = "c"
+mods = "Super"
+chars = "\u0001\u0074"
+
+# Rename current window: F2 -> C-a ,
+[[keyboard.bindings]]
+key = "F2"
+chars = "\u0001\u002c"
+
+# Show pane numbers: Option 0
+[[keyboard.bindings]]
+key = "0"
+mods = "Alt"
+chars = "\u0001\u0071"
+
 # ############################
 # ## better tmux navigation ##
 # ############################
@@ -289,9 +310,3 @@ command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "8"
 key = "9"
 mods = "Alt"
 command = { program = "/opt/homebrew/bin/tmux", args = ["select-pane", "-t", "9"] }
-
-# Show pane numbers: Option 0
-[[keyboard.bindings]]
-key = "0"
-mods = "Alt"
-chars = "\u0001\u0071"
