@@ -56,7 +56,6 @@ source ~/dotfiles/common/directories.zsh
 source ~/dotfiles/common/aliases.sh
 source ~/dotfiles/common/functions.sh
 source ~/dotfiles/common/take.sh
-source ~/dotfiles/common/extras.sh
 
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='vim'
@@ -83,5 +82,5 @@ setopt hist_ignore_dups
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# Trustly environment
-source ~/paywithmybank/dotfiles/environment.sh
+# Load personal and coorporate configurations
+source ~/private.sh

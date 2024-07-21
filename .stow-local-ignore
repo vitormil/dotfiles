@@ -1,7 +1,8 @@
+.DS_Store
 .git
 brew
 common
 custom
-install.sh
+symlinks.sh
 README.md
 screenshots

@@ -29,3 +29,6 @@ todo() {
   open_todo
 }
 
+s() {
+  sesh connect $(sesh list | fzf)
+}
