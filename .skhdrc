@@ -48,6 +48,7 @@ cmd + alt - 0 : yabai -m space --balance
 
 cmd + alt + ctrl - a : osascript -e 'tell application "Alacritty" to activate' || open /Applications/Alacritty.app
 cmd + alt + ctrl - c : osascript -e 'tell application "Chrome" to activate' || open /Applications/Google\ Chrome.app
+cmd + alt + ctrl - d : osascript -e 'tell application "DBeaver" to activate' || open /Applications/DBeaver.app
 cmd + alt + ctrl - e : osascript -e 'tell application "Calendar" to activate' || open /Applications/Calendar.app
 cmd + alt + ctrl - f : osascript -e 'tell application "Finder" to make new Finder window' || osascript -e 'tell application "Finder" to activate'
 cmd + alt + ctrl - g : osascript -e 'tell application "ChatGPT" to activate' || open /Applications/ChatGPT.app
