@@ -1,4 +1,4 @@
-alias l="exa --header --long --all --group-directories-first --ignore-glob=\"*DS_Store*\""
+alias l="eza --header --long --all --group-directories-first --ignore-glob=\"*DS_Store*\""
 alias ll="l --sort=created"
 alias g="jump"
 alias cd="z" # zoxide

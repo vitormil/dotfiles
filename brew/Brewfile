@@ -8,7 +8,7 @@ brew 'git-delta'
 brew 'node'
 brew 'ruby'
 
-brew 'exa'
+brew 'eza'
 brew 'tree'
 brew 'trash'
 brew 'bat'
