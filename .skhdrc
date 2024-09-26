@@ -11,7 +11,9 @@ cmd + alt - k : yabai -m window --swap north
 cmd + alt - l : yabai -m window --swap east
 
 # resize window
-cmd + alt - left : yabai -m window --resize right:-100:0 2> /dev/null || yabai -m window --resize left:-100:0 2> /dev/null
+# cmd + alt - left : yabai -m window --resize right:-100:0 2> /dev/null || yabai -m window --resize left:-100:0 2> /dev/null
+# cmd + alt - right : yabai -m window --resize right:100:0 2> /dev/null || yabai -m window --resize left:100:0 2> /dev/null
+
 cmd + alt - pagedown : yabai -m window --resize right:-100:0 2> /dev/null || yabai -m window --resize left:-100:0 2> /dev/null
 
 cmd + alt - end  : yabai -m window --resize bottom:0:100 2> /dev/null || yabai -m window --resize top:0:100 2> /dev/null
@@ -21,7 +23,6 @@ cmd + alt - home : yabai -m window --resize bottom:0:-100 2> /dev/null || yabai 
 cmd + alt - up : yabai -m window --resize bottom:0:-100 2> /dev/null || yabai -m window --resize top:0:-100 2> /dev/null
 
 cmd + alt - pageup : yabai -m window --resize right:100:0 2> /dev/null || yabai -m window --resize left:100:0 2> /dev/null
-cmd + alt - right : yabai -m window --resize right:100:0 2> /dev/null || yabai -m window --resize left:100:0 2> /dev/null
 
 # move managed window
 shift + alt + ctrl - h : yabai -m window --warp west

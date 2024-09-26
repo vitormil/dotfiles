@@ -45,6 +45,8 @@ yabai -m rule --add app="^Rancher Desktop$" manage=off
 yabai -m rule --add app="^Activity Monitor$" manage=off
 yabai -m rule --add app="^ImageOptim$" manage=off
 yabai -m rule --add app="^CleanShot X$" manage=off
+yabai -m rule --add app="^Update$" manage=off
+yabai -m rule --add app="^Runner$" manage=off
 yabai -m rule --add app="^Settings$" manage=off
 
 echo "yabai configuration loaded.."
