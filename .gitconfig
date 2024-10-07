@@ -4,6 +4,8 @@
   signingkey = FAD924C98A0354E2
 [includeIf "gitdir:~/paywithmybank/"]
   path = ~/paywithmybank/.gitconfig
+[includeIf "gitdir:~/trustly/"]
+  path = ~/trustly/.gitconfig
 [commit]
   gpgsign = true
 [core]

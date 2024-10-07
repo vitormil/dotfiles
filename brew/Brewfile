@@ -26,6 +26,8 @@ brew 'mise'
 brew 'lazydocker'
 brew 'fzf'
 brew 'zoxide'
+brew 'loop'
+brew '1password-cli'
 
 # Casks
 cask 'font-hack-nerd-font'
