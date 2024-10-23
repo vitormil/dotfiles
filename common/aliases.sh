@@ -1,5 +1,8 @@
 alias l="eza --header --long --all --group-directories-first --ignore-glob=\"*DS_Store*\""
-alias ll="l --sort=created"
+alias lt="eza --tree --level=2 --long --icons --git --ignore-glob=\"*DS_Store*\""
+alias ll="lt --all"
+alias lc="l --sort=created"
+
 alias g="jump"
 alias cd="z" # zoxide
 alias h="history | fzf"
@@ -9,12 +12,14 @@ alias r="bin/rails"
 alias bi="bundle install"
 alias o="open ."
 alias c="code ."
+alias n="nvim ."
+alias vim="nvim"
 alias co="fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}' | xargs code"
 alias ef="env | fzf | pbcopy"
-alias n="nvim"
 alias ld="lazydocker"
 alias rm="trash"
 alias htop="zenith"
+alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
 
 alias j="find . -type d -name 'node_modules' -prune -o -type f -name '*.json' -print | fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}' | xargs fx"
 
