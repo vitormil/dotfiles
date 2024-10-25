@@ -17,6 +17,10 @@ brew 'fd'
 brew 'fx'
 brew 'zenith'
 
+brew 'gnu-sed'
+brew 'the_silver_searcher'
+brew 'ripgrep'
+
 brew 'tmux'
 brew 'neovim'
 

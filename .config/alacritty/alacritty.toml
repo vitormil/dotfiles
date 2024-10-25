@@ -13,7 +13,7 @@ decorations = "Buttonless"
 startup_mode = "Maximized"
 
 [font]
-size=18.5
+size=19.5
 
 [font.normal]
 family = "Hack Nerd Font"

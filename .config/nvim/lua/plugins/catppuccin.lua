@@ -5,8 +5,19 @@ return {
   name = "catppuccin",
   priority = 1000,
   config = function()
-    vim.api.nvim_set_hl(0, "CursorLineNr", { fg = "yellow" })
-    vim.api.nvim_set_hl(0, "LineNr", { fg = "yellow" })
+    require("catppuccin").setup {
+        custom_highlights = function(colors)
+            return {
+                -- change current line color
+                -- CursorLine = { bg = colors.bg_highlight },
+                CursorLineNr = { fg = '#ffeb95' },
+                NonText = { fg = '#333543' },
+                Whitespace = { fg = '#333543' },
+            }
+        end
+    }
+
     vim.cmd.colorscheme("catppuccin")
+
   end,
 }
