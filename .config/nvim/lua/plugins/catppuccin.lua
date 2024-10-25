@@ -2,6 +2,7 @@
 -- https://github.com/catppuccin/nvim
 return {
   "catppuccin/nvim",
+  enabled = true,
   name = "catppuccin",
   priority = 1000,
   config = function()
@@ -18,6 +19,5 @@ return {
     }
 
     vim.cmd.colorscheme("catppuccin")
-
   end,
 }

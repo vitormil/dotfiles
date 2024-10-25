@@ -20,3 +20,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("vim-options")
 require("lazy").setup("plugins")
+
+-- Navigation Shortcuts
+vim.keymap.set("n", "<C-[>", "<C-o>", { desc = "Back"})
+vim.keymap.set("n", "<C-]>", "<C-i>", { desc = "Forward"})

@@ -12,7 +12,7 @@
   excludesfile = ~/.gitignore
   autocrlf = input
   safecrlf = warn
-  editor = vim
+  editor = nvim
   pager = delta
 [interactive]
   diffFilter = delta --color-only
