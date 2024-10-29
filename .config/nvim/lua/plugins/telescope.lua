@@ -16,13 +16,6 @@ return {
 
       vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = 'Telescope find files' })
 
-      vim.keymap.set(
-        "n",
-        "<S-h>",
-        "<cmd>Telescope buffers sort_mru=true sort_lastused=true initial_mode=normal theme=ivy<cr>",
-        { desc = "[P]Open telescope buffers" }
-      )
-
       vim.api.nvim_set_keymap("n", "<Leader>rf",
         [[<cmd>lua require('telescope').extensions.recent_files.pick()<CR>]],
         {noremap = true, silent = true})

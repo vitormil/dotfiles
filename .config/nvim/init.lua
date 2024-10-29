@@ -24,3 +24,11 @@ require("lazy").setup("plugins")
 -- Navigation Shortcuts
 vim.keymap.set("n", "<C-[>", "<C-o>", { desc = "Back"})
 vim.keymap.set("n", "<C-]>", "<C-i>", { desc = "Forward"})
+
+-- add highlit yank
+vim.cmd [[
+  augroup yank_highlight
+    autocmd!
+    autocmd TextYankPost * silent! lua vim.highlight.on_yank {higroup="IncSearch", timeout=200}
+  augroup END
+]]

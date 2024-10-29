@@ -7,15 +7,20 @@ return {
   priority = 1000,
   config = function()
     require("catppuccin").setup {
-        custom_highlights = function(colors)
+      flavour = "mocha", -- latte, frappe, macchiato,
+      custom_highlights = function(colors)
             return {
-                -- change current line color
-                -- CursorLine = { bg = colors.bg_highlight },
-                CursorLineNr = { fg = '#ffeb95' },
+                CursorLineNr = { fg = '#F9E2AF' },
                 NonText = { fg = '#333543' },
                 Whitespace = { fg = '#333543' },
+                IncSearch = { fg = '#333543', bg = '#FFDE7A' },
+                Search = { fg = '#333543', bg = '#F9E2AF' },
             }
-        end
+      end,
+      color_overrides = {
+        mocha = {
+        },
+      }
     }
 
     vim.cmd.colorscheme("catppuccin")
