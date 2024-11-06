@@ -13,10 +13,10 @@ decorations = "Buttonless"
 startup_mode = "Maximized"
 
 [font]
-size=19.5
+size=22
 
 [font.normal]
-family = "Hack Nerd Font"
+family = "MesloLGL Nerd Font"
 style = "Regular"
 
 [cursor]

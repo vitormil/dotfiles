@@ -1,6 +1,7 @@
 -- disable netrw
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
+vim.opt.termguicolors = true
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -22,8 +23,13 @@ require("vim-options")
 require("lazy").setup("plugins")
 
 -- Navigation Shortcuts
-vim.keymap.set("n", "<C-[>", "<C-o>", { desc = "Back"})
-vim.keymap.set("n", "<C-]>", "<C-i>", { desc = "Forward"})
+-- vim.keymap.set("n", "<C-[>", "<C-o>", { desc = "Back"})
+-- vim.keymap.set("n", "<C-]>", "<C-i>", { desc = "Forward"})
+
+-- nnoremap <c-s> :w<cr>
+
+-- vim.keymap.set("n", "<Leader>w", ":w<CR>", { desc = "Save file" })
+vim.keymap.set("n", "<c-s>", ":w<CR>", { desc = "Save file" })
 
 -- add highlit yank
 vim.cmd [[

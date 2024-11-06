@@ -17,12 +17,8 @@ return {
                 Search = { fg = '#333543', bg = '#F9E2AF' },
             }
       end,
-      color_overrides = {
-        mocha = {
-        },
-      }
     }
 
-    vim.cmd.colorscheme("catppuccin")
+    -- vim.cmd.colorscheme("catppuccin")
   end,
 }
