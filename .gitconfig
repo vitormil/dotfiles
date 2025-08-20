@@ -1,0 +1,99 @@
+[user]
+  name = Vitor Oliveira
+  email = vitormil@gmail.com
+[core]
+  excludesfile = ~/.gitignore
+  autocrlf = input
+  safecrlf = warn
+  editor = nvim
+  pager = delta
+[interactive]
+  diffFilter = delta --color-only
+[init]
+  defaultBranch = master
+[alias]
+  b = branch --column
+  s = status -sb
+  aa = add --all
+  st = status
+  co = checkout
+  ci = commit -v
+  cp = cherry-pick
+  di = diff
+  dc = diff --cached
+  dt = difftool
+  rr = remote -v
+  vv = branch -vv
+  rs = reset --soft HEAD~1
+  fa = fetch --all
+  pf = push --force
+  cl = clean -fd
+  wip = commit -m "wip" --no-verify
+  amend = commit --amend
+  local-branches = "!git for-each-ref --sort=-committerdate refs/heads/ --format='%(committerdate:relative)|%(authorname)|%(refname:short)' | column -ts '|'"
+  remote-branches = "!git for-each-ref --sort=-committerdate refs/remotes/ --format='%(committerdate:relative)|%(authorname)|%(refname:short)' | column -ts '|'"
+
+  fast-log = !git --no-pager log --oneline
+  fl = fast-log
+
+  migrations-from-tag = "!sh -c 'git --no-pager diff $0~1...$0 --name-only -- \"*.sql\"'"
+  mft = migrations-from-tag
+
+  find-merge = "!sh -c 'commit=$0 && branch=${1:-HEAD} && (git rev-list $commit..$branch --ancestry-path | cat -n; git rev-list $commit..$branch --first-parent | cat -n) | sort -k2 -s | uniq -f1 -d | sort -n | tail -1 | cut -f2'"
+  show-merge = "!sh -c 'merge=$(git find-merge $0 $1) && [ -n \"$merge\" ] && git show $merge'"
+[push]
+  default = simple
+[column]
+  ui = auto
+[color]
+  ui = true
+  branch = auto
+  diff = auto
+  interactive = auto
+  status = auto
+[merge]
+  conflictstyle = diff3
+[delta]
+  features = unobtrusive-line-numbers decorations
+  whitespace-error-style = 22 reverse
+  commit-style                  = yellow
+  file-style                    = brightyellow
+  minus-style                   = red
+  minus-non-emph-style          = red
+  minus-emph-style              = red 52
+  minus-empty-line-marker-style = normal "#3f0001"
+  zero-style                    = normal
+  plus-style                    = green
+  plus-non-emph-style           = green
+  plus-emph-style               = green 22
+  plus-empty-line-marker-style  = normal "#ff00ff"
+  grep-file-style               = blue
+  grep-line-number-style        = blue
+  whitespace-error-style        = reverse red
+  true-color                    = always
+  file-added-label              = 🐣
+  file-modified-label           = ✨
+  file-removed-label            = 💥
+  file-renamed-label            = 🤌፡
+  right-arrow                   = ➡️፡
+  hyperlinks                    = false
+  inspect-raw-lines             = true
+  keep-plus-minus-markers       = false
+  line-numbers                  = true
+  line-numbers-minus-style      = "#a54248"
+  line-numbers-zero-style       = "#33414a"
+  line-numbers-plus-style       = "#6a8b68"
+  line-numbers-left-style       = blue
+  line-numbers-right-style      = blue
+  navigate                      = true
+  paging                        = auto
+  side-by-side                  = false
+[delta "decorations"]
+  commit-decoration-style = bold yellow box ul
+  file-decoration-style = none
+  commit-style = raw
+  file-style = omit
+  hunk-header-decoration-style = yellow box
+  hunk-header-file-style = yellow
+  hunk-header-line-number-style = yellow
+  hunk-header-style = file line-number syntax

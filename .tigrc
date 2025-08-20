@@ -1,0 +1,10 @@
+# https://gist.github.com/rinthel/5b8e36dc72b7a5b6d60d0e4d4bc72266
+
+# ! Run the command in the foreground with output shown.
+# @ Run the command in the background with no output.
+# ? Prompt the user before executing the command.
+# < Exit Tig after executing the command.
+
+bind main <Ctrl-r> !<git rebase -i %(commit)^
+
+source ~/.config/tig/theme.tigrc
