@@ -8,4 +8,4 @@ export PGPASSWORD="postgres"
 
 export TODO_FILE="$HOME/vitor/TODO.txt"
 
-export BAT_THEME="Catppuccin Mocha"
+export BAT_THEME="mocha" # bat cache --build

@@ -1,0 +1,20 @@
+{
+    "faviconService": "twenty",
+    "font": {
+        "normal": "DejaVu Sans Mono",
+        "size": 10
+    },
+    "popToRootOnClose": false,
+    "rootSearch": {
+        "searchFiles": false
+    },
+    "theme": {
+        "iconTheme": "Adwaita",
+        "name": "catppuccin-dark.json"
+    },
+    "window": {
+        "csd": true,
+        "opacity": 1,
+        "rounding": 10
+    }
+}

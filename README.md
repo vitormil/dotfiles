@@ -4,8 +4,8 @@ This repository contains the dotfiles for my Arch Linux, based on [Omarchy](http
 
 ## Packages
 
-Export: `pacman -Qq > packman-packages.txt`
-Import: `pacman -S --needed - < packman-packages.txt`
+- Export: `pacman -Qq > packman-packages.txt`
+- Import: `pacman -S --needed - < packman-packages.txt`
 
 ## Installation
 
@@ -13,8 +13,8 @@ Import: `pacman -S --needed - < packman-packages.txt`
 
 ```shell
 › cd
-› git clone git@github.com/vitormil/dotfiles-arch.git
-› cd dotfiles-arch
+› git clone git@github.com/vitormil/dotfiles.git
+› cd dotfiles
 ```
 
 2; Use GNU stow to create symlinks:
