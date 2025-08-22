@@ -50,3 +50,23 @@ theme=AtomOneDarkVitor
 # # which is explained in the docs for that config option.
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
+
+keybind = ctrl+t=text:\x01c
+keybind = ctrl+w=text:\x01x
+
+keybind = f2=text:\x01,
+
+keybind = super+shift+[=text:\x01p
+keybind = ctrl+shift+tab=text:\x01p
+keybind = super+shift+]=text:\x01n
+keybind = ctrl+tab=text:\x01n
+
+keybind = ctrl+1=text:\x011
+keybind = ctrl+2=text:\x012
+keybind = ctrl+3=text:\x013
+keybind = ctrl+4=text:\x014
+keybind = ctrl+5=text:\x015
+keybind = ctrl+6=text:\x016
+keybind = ctrl+7=text:\x017
+keybind = ctrl+8=text:\x018
+keybind = ctrl+9=text:\x019
