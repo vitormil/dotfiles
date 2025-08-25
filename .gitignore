@@ -4,3 +4,4 @@
 *.iml
 bookmarks.db.json*
 .factorypath
+*.bak*
