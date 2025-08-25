@@ -4,8 +4,8 @@ This repository contains the dotfiles for my Arch Linux, based on [Omarchy](http
 
 ## Packages
 
-- Export: `pacman -Qq > packman-packages.txt`
-- Import: `pacman -S --needed - < packman-packages.txt`
+- Export: `pacman -Qq > pacman-packages.txt`
+- Import: `pacman -S --needed - < pacman-packages.txt`
 
 ## Installation
 
