@@ -1,0 +1,159 @@
+#!/bin/bash
+
+HYPRECISE_MODE=${HYPRECISE_MODE:-auto}
+HYPRECISE_LOOP=${HYPRECISE_LOOP:-false}
+
+command -v jq >/dev/null 2>&1 || { echo "Error: jq is required"; exit 1; }
+
+direction=$1
+if [ -z "$direction" ] || [ "$direction" == "--help" ]; then
+  echo "Usage: hyprecise <left|right|up|down>"
+  exit 0
+fi
+
+if [ "$direction" != "left" ] && [ "$direction" != "right" ] && [ "$direction" != "up" ] && [ "$direction" != "down" ]; then
+  echo "Error: Invalid direction '$direction'. Use 'left', 'right', 'up', or 'down'."
+  exit 1
+fi
+
+current_window=$(hyprctl -j activewindow)
+if [ -z "$current_window" ] || [ "$current_window" == "null" ]; then
+  echo "Info: No active window found. Skipping resize."
+  exit 0
+fi
+
+current_floating=$(jq -r ".floating" <<<"$current_window")
+if [ "$current_floating" == "true" ]; then
+  echo "Info: Active window is floating. Skipping resize."
+  exit 0
+fi
+
+current_address=$(jq -r ".address" <<<"$current_window")
+current_workspace=$(jq -r ".workspace.id" <<<"$current_window")
+current_width=$(jq -r ".size[0]" <<<"$current_window")
+
+clients=$(hyprctl -j clients | jq -r "[.[] | select(.workspace.id == $current_workspace and .floating == false)] | sort_by(.at[0])")
+first_address=$(jq -r ".[0].address" <<<"$clients")
+first_width=$(jq -r ".[0].size[0]" <<<"$clients")
+
+if [ -z "$first_address" ] || [ "$first_address" == "null" ]; then
+  echo "Info: No tiled clients found in workspace"
+  exit 0
+fi
+
+monitors=$(hyprctl -j monitors)
+monitor_id=$(jq -r ".monitor" <<<"$current_window")
+monitor_width=$(jq ".[]|select(.id==$monitor_id)|.width"  <<<"$monitors")
+
+if [[ ! "$HYPRECISE_MODE" =~ ^(auto|wide|compact)$ ]]; then
+  HYPRECISE_MODE="auto"
+fi
+
+if [[ "$HYPRECISE_MODE" == "auto" ]]; then
+  if (( monitor_width >= 3440 )); then
+    columns=5
+  else
+    columns=3
+  fi
+elif [[ "$HYPRECISE_MODE" == "compact" ]]; then
+  columns=3
+elif [[ "$HYPRECISE_MODE" == "wide" ]]; then
+  columns=5
+else
+  columns=5
+fi
+
+if (( columns == 3 )); then
+  half_screen=$((monitor_width / 2))
+  bloco=$((half_screen / 2))
+  p0=$((half_screen - bloco))
+  p1=$((half_screen))
+  p2=$((half_screen + bloco))
+  tolerance=$(((p1 - p0) / 2))
+
+  checkpoints=($p0 $p1 $p2)
+  mid_index=1
+  last_index=2
+elif (( columns == 5 )); then
+  base=$((monitor_width / 6))
+  p0=$((base * 1))
+  p1=$((base * 2))
+  p2=$((base * 3))
+  p3=$((base * 4))
+  p4=$((base * 5))
+  tolerance=$(((p1 - p0) / 2))
+
+  checkpoints=($p0 $p1 $p2 $p3 $p4)
+  mid_index=2
+  last_index=4
+fi
+
+new_index=$mid_index
+for ((i=0; i<=last_index; i++)); do
+  if (( first_width <= (checkpoints[$i]) )); then
+    new_index=$i
+    break
+  fi
+done
+
+case "$direction" in
+  right)
+    new_index=$((new_index + 1))
+    ;;
+  left)
+    new_index=$((new_index - 1))
+    ;;
+  up)
+    new_index=$last_index
+    if (( current_width < checkpoints[mid_index]-tolerance )); then
+      new_index=$mid_index
+    elif (( first_width == checkpoints[last_index] )); then
+      if [ "$first_address" == "$current_address" ]; then
+        new_index=$mid_index
+      else
+        new_index=0
+      fi
+    elif (( first_width == checkpoints[0] )); then
+      if [ "$first_address" == "$current_address" ]; then
+        new_index=$last_index
+      else
+        new_index=$mid_index
+      fi
+    elif (( first_width == checkpoints[mid_index] )); then
+      if [ "$first_address" == "$current_address" ]; then
+        new_index=$last_index
+      else
+        new_index=0
+      fi
+    fi
+    ;;
+  down)
+    new_index=$mid_index
+    if (( first_width == checkpoints[mid_index] )); then
+      if [ "$first_address" == "$current_address" ]; then
+        new_index=0
+      else
+        new_index=$last_index
+      fi
+    fi
+    ;;
+esac
+
+if (( new_index > last_index )); then
+  if [ "$HYPRECISE_LOOP" == "false" ]; then
+    new_index=$last_index
+  else
+    new_index=0
+  fi
+elif (( new_index < 0 )); then
+  if [ "$HYPRECISE_LOOP" == "false" ]; then
+    new_index=0
+  else
+    new_index=$last_index
+  fi
+fi
+
+new_width=${checkpoints[$new_index]}
+delta_x=$((new_width - first_width))
+
+hyprctl dispatch resizewindowpixel $delta_x 0,address:$first_address
