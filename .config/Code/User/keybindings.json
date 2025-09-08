@@ -28,12 +28,13 @@
     "command": "editor.togglequotes"
   },
   {
-    "key": "cmd+'",
+    "key": "cmd+`",
     "command": "-editor.togglequotes"
   },
   {
-    "key": "cmd+.",
-    "command": "workbench.files.action.showActiveFileInExplorer"
+    "key": "meta+.",
+    "command": "workbench.files.action.showActiveFileInExplorer",
+    "when": "editorFocus"
   },
   {
     "key": "cmd+d",
@@ -425,5 +426,14 @@
   {
     "key": "ctrl+k ctrl+k",
     "command": "deleteAllRight"
+  },
+  {
+    "key": "shift+meta+f",
+    "command": "workbench.action.findInFiles"
+  },
+  {
+    "key": "meta+.",
+    "command": "workbench.action.focusActiveEditorGroup",
+    "when": "filesExplorerFocus"
   },
 ]

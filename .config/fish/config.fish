@@ -11,5 +11,8 @@ source ~/dotfiles/common/take.fish
 source ~/dotfiles/common/functions.fish
 source ~/dotfiles/common/exports.fish
 source ~/dotfiles/common/directories.fish
+source ~/dotfiles/common/try.fish
+
+source ~/private.fish
 
 set -g font "Fira Code Nerd Font"
