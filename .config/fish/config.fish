@@ -12,6 +12,7 @@ source ~/dotfiles/common/functions.fish
 source ~/dotfiles/common/exports.fish
 source ~/dotfiles/common/directories.fish
 source ~/dotfiles/common/try.fish
+source ~/dotfiles/common/last_dir.fish
 
 source ~/private.fish
 
