@@ -436,4 +436,14 @@
     "command": "workbench.action.focusActiveEditorGroup",
     "when": "filesExplorerFocus"
   },
+  {
+    "key": "ctrl+down",
+    "command": "editor.action.nextSelectionMatchFindAction",
+    "when": "editorFocus"
+  },
+  {
+    "key": "ctrl+up",
+    "command": "editor.action.previousSelectionMatchFindAction",
+    "when": "editorFocus"
+  },
 ]

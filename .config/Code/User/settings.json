@@ -1,4 +1,5 @@
 {
+  "update.mode": "none",
   "workbench.colorTheme": "Night Owl",
   "workbench.iconTheme": "catppuccin-macchiato",
   "window.title": "${activeEditorLong}${separator}${rootName}",
@@ -30,7 +31,9 @@
     ".sequelizerc": "javascript",
     ".stylelintrc": "json",
     "*.css": "tailwindcss",
-    "*.svg": "html"
+    "*.svg": "html",
+    "*.conf.bak": "nginx"
+
   },
   "explorer.compactFolders": false,
   "editor.renderLineHighlight": "all",
@@ -65,9 +68,9 @@
   "workbench.editor.decorations.colors": true,
   "workbench.editor.enablePreviewFromCodeNavigation": true,
   "editor.autoClosingDelete": "always",
-  "editor.formatOnPaste": true,
-  "editor.formatOnType": true,
-  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
+  "editor.formatOnSave": false,
   "editor.minimap.showSlider": "always",
   "editor.stickyTabStops": false,
   "editor.renderWhitespace": "all",
@@ -274,5 +277,8 @@
   "editor.lineHeight": 0,
   "git.blame.editorDecoration.enabled": true,
   "editor.minimap.enabled": false,
-  "github.copilot.nextEditSuggestions.enabled": true
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+  "debug.disassemblyView.showSourceCode": false
 }
