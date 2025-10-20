@@ -12,3 +12,4 @@ ttf-fira-code
 visual-studio-code-bin
 xclip
 zoxide
+tig
