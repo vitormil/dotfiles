@@ -44,6 +44,28 @@ This repository contains the dotfiles for my Arch Linux, based on [Omarchy](http
 | xclip | [astrand/xclip](https://github.com/astrand/xclip) | System Utilities | Command line interface to X11 clipboard |
 | zoxide | [ajeetdsouza/zoxide](https://github.com/ajeetdsouza/zoxide) | Navigation | Smarter cd command that learns your habits |
 
+### Install packages from file
+
+```
+sudo pacman -S --needed - < pacman-packages.txt
+yay -S --needed - < aur-packages.txt
+```
+
+## Fish Shell
+
+Init in `~/.bashrc`:
+```
+# Start fish shell if interactive and not already in fish
+if [[ $- == *i* ]] && [[ -z "$FISH_VERSION" ]]; then
+    exec fish
+fi
+```
+
+Set as default shell:
+```
+chsh -s /usr/bin/fish
+```
+
 ## License
 
 The code is available under the MIT license.
