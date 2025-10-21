@@ -13,3 +13,4 @@ visual-studio-code-bin
 xclip
 zoxide
 tig
+libvips

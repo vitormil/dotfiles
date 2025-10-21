@@ -1,7 +1,8 @@
 {
   "update.mode": "none",
   "workbench.colorTheme": "Night Owl",
-  "workbench.iconTheme": "catppuccin-macchiato",
+  "workbench.iconTheme": "catppuccin-perfect-monokai",
+  "workbench.productIconTheme": "fluent-icons",
   "window.title": "${activeEditorLong}${separator}${rootName}",
   "editor.fontFamily": "'JetBrainsMonoNL NF', 'Fira Code', Monaco, 'Courier New', monospace",
   "editor.fontWeight": "300",
@@ -250,7 +251,6 @@
     "REUSE_BROWSER": "false",
     "REUSE_CONTEXT": "false"
   },
-  "workbench.productIconTheme": "fluent-icons",
   "rubyLsp.customRubyCommand": "mise",
   "rubyLsp.rubyExecutablePath": "/home/voliveira/.local/share/mise/installs/ruby/3.3.5/bin/ruby",
   "[erb]": {

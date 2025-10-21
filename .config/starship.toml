@@ -1,2 +1,5 @@
 [character]
 success_symbol = '›'
+
+[directory]
+truncate_to_repo=true

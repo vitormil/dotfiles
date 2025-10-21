@@ -70,3 +70,13 @@ keybind = ctrl+6=text:\x016
 keybind = ctrl+7=text:\x017
 keybind = ctrl+8=text:\x018
 keybind = ctrl+9=text:\x019
+
+# Cursor
+cursor-style = block
+cursor-style-blink = true
+cursor-color = #fff987
+
+# Keyboard bindings
+keybind = shift+insert=paste_from_clipboard
+keybind = control+insert=copy_to_clipboard
+keybind = control+g>r=reload_config
