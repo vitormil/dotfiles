@@ -14,3 +14,5 @@ xclip
 zoxide
 tig
 libvips
+openslide
+flameshot
