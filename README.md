@@ -66,6 +66,15 @@ Set as default shell:
 chsh -s /usr/bin/fish
 ```
 
+## Manual
+
+```
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+tmux # (C-a i) to install tpm plugins
+rm ~/.config/omarchy/current/theme/backgrounds/*
+cp ~/dotfiles/backgrounds/* $HOME/.config/omarchy/current/theme/backgrounds
+```
+
 ## License
 
 The code is available under the MIT license.
