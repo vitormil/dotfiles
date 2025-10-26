@@ -1,6 +1,6 @@
 hunspell-pt-br
 localsend
 sesh-bin
-trashy
+trashy-git
 trimage-git
 vicinae-bin
