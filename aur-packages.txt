@@ -4,3 +4,4 @@ sesh-bin
 trashy-git
 trimage-git
 vicinae-bin
+tofi
