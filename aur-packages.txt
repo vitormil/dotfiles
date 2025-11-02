@@ -1,7 +1,7 @@
 hunspell-pt-br
 localsend
 sesh-bin
-trashy-git
+trashy
 trimage-git
 vicinae-bin
 tofi

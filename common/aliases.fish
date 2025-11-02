@@ -14,7 +14,7 @@ alias o="open ."
 alias c="code ."
 alias n="nvim"
 alias vim="nvim"
-# alias rm="trash"
+
 alias htop="zenith"
 alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
 

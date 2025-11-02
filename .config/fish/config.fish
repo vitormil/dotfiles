@@ -13,6 +13,7 @@ source ~/dotfiles/common/exports.fish
 source ~/dotfiles/common/directories.fish
 source ~/dotfiles/common/try.fish
 source ~/dotfiles/common/default_dir.fish
+source ~/dotfiles/common/safe_rm.fish
 
 source ~/private.fish
 
