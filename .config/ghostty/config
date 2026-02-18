@@ -80,3 +80,6 @@ cursor-color = #fff987
 keybind = shift+insert=paste_from_clipboard
 keybind = control+insert=copy_to_clipboard
 keybind = control+g>r=reload_config
+
+# Slowdown mouse scrolling
+mouse-scroll-multiplier = 0.95

@@ -6,6 +6,7 @@ starship init fish | source
 zoxide init fish | source
 mise activate fish | source
 
+source ~/dotfiles/common/add_path.fish
 source ~/dotfiles/common/aliases.fish
 source ~/dotfiles/common/take.fish
 source ~/dotfiles/common/functions.fish
