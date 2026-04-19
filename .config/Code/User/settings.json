@@ -34,7 +34,6 @@
     "*.css": "tailwindcss",
     "*.svg": "html",
     "*.conf.bak": "nginx"
-
   },
   "explorer.compactFolders": false,
   "editor.renderLineHighlight": "all",
@@ -280,5 +279,10 @@
   "github.copilot.nextEditSuggestions.enabled": true,
   "gitlens.ai.model": "vscode",
   "gitlens.ai.vscode.model": "copilot:gpt-4.1",
-  "debug.disassemblyView.showSourceCode": false
+  "debug.disassemblyView.showSourceCode": false,
+  "chat.viewSessions.orientation": "stacked",
+  "chat.tools.terminal.autoApprove": {
+    "printf": true,
+    "awk": true
+  }
 }
