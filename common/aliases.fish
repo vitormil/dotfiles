@@ -21,8 +21,6 @@ alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
 alias ni="npm install"
 alias ns="npm run start"
 
-alias cat="bat"
-
 alias dcu="docker-compose up"
 alias dcud="docker-compose up -d"
 alias dcd="docker-compose down"

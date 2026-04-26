@@ -6,6 +6,7 @@ set -g tmux_custom_names \
     "bin/dev"   "💻 Server" \
     "rails"   "🤖 Rails" \
     "r"   "🤖 Rails" \
+    "claude"   "✨ Claude" \
     "docker-compose"   "🐳 Docker"
 
 function _tmux_lookup_title
