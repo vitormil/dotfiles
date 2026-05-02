@@ -11,11 +11,13 @@ source ~/dotfiles/common/aliases.fish
 source ~/dotfiles/common/take.fish
 source ~/dotfiles/common/functions.fish
 source ~/dotfiles/common/exports.fish
-source ~/dotfiles/common/directories.fish
 source ~/dotfiles/common/try.fish
 source ~/dotfiles/common/tmux.fish
-source ~/dotfiles/common/default_dir.fish
 source ~/dotfiles/common/safe_rm.fish
+
+source ~/dotfiles/common/default_dir.fish
+source ~/dotfiles/common/directories.fish
+# source ~/dotfiles/common/lastdir.fish
 
 source ~/private.fish
 
