@@ -7,7 +7,8 @@ set -g tmux_custom_names \
     "rails"   "🤖 Rails" \
     "r"   "🤖 Rails" \
     "claude"   "✨ Claude" \
-    "docker-compose"   "🐳 Docker"
+    "docker-compose"   "🐳 Docker" \
+    "docker"   "🐳 Docker"
 
 function _tmux_lookup_title
     set -l cmd $argv[1]

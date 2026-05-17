@@ -283,5 +283,6 @@
   "chat.tools.terminal.autoApprove": {
     "printf": true,
     "awk": true
-  }
+  },
+  "window.confirmBeforeClose": "always"
 }
