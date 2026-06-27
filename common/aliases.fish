@@ -14,6 +14,8 @@ alias o="open ."
 alias c="code ."
 alias n="nvim"
 alias vim="nvim"
+alias deploy="bin/deploy"
+alias dev="bin/dev"
 
 alias htop="zenith"
 alias ff="fzf --preview 'bat --style=numbers --color=always {}'"

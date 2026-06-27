@@ -4,9 +4,11 @@ end
 
 set -g tmux_custom_names \
     "bin/dev"   "💻 Server" \
+    "dev"   "💻 Server" \
     "rails"   "🤖 Rails" \
     "r"   "🤖 Rails" \
     "claude"   "✨ Claude" \
+    "deploy"   "🚀 Deploy" \
     "docker-compose"   "🐳 Docker" \
     "docker"   "🐳 Docker"
 
