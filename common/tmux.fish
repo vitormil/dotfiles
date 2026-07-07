@@ -4,6 +4,7 @@ end
 
 set -g tmux_custom_names \
     "bin/dev"   "💻 Server" \
+    "bin/jobs"   "🗂 SolidQueue" \
     "dev"   "💻 Server" \
     "rails"   "🤖 Rails" \
     "r"   "🤖 Rails" \

@@ -140,6 +140,6 @@ function fzfdir
         set fzf_cmd $fzf_cmd "--query" "$query"
     end
 
-    set dir (fd --type d --hidden --exclude '.*' . $search_path | $fzf_cmd)
+    set dir (fd --type d --max-depth 1 --hidden --exclude '.*' . $search_path | sort -r | $fzf_cmd)
     echo $dir
 end
