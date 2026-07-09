@@ -18,7 +18,13 @@ function _tmux_lookup_title
     set i 1
     while test $i -le (count $tmux_custom_names)
         if test "$tmux_custom_names[$i]" = "$cmd"
-            echo $tmux_custom_names[(math $i + 1)]
+            set -l title $tmux_custom_names[(math $i + 1)]
+            if test "$cmd" = "claude"
+                set -l folder (basename (pwd))
+                echo "$title [$folder]"
+            else
+                echo $title
+            end
             return
         end
         set i (math $i + 2)
