@@ -1,6 +1,5 @@
 hunspell-pt-br
 localsend
-nerdfetch
 sesh-bin
 trashy
 trimage-git
