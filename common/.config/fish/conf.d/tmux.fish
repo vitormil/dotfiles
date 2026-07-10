@@ -39,6 +39,7 @@ end
 function update_tmux_title --on-event fish_prompt
     if test -n "$TMUX"; and not _tmux_manual_rename
         set cmd (ps -o comm= -p $fish_pid 2>/dev/null | string trim | string split ' ')[1]
+        set cmd (string replace -r '^-' '' -- $cmd)
 
         if test "$cmd" = "fish"
             tmux rename-window (string replace -r "^$HOME" "~" (pwd))

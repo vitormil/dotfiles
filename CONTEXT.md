@@ -95,6 +95,19 @@ that OS; equivalents are never stubbed out preemptively for a tool not yet in us
   `trash put $argv` (git-style subcommand) — different CLIs behind the same package
   name, single-line difference, not worth duplicating the whole file for.
 
+- **2026-07-10** — `common/.config/fish/conf.d/tmux.fish`'s `update_tmux_title`
+  strips a leading `-` from the command name before comparing/using it, and passes
+  `--` to the `string replace` call that does so. Root cause: once tmux's
+  `default-shell` was fixed to launch fish via an absolute path (see the superseded
+  decision above), fish now starts as tmux's login shell, and login shells are
+  reported by `ps -o comm=` with a leading dash (`-fish` instead of `fish`) — a
+  convention, not a fish bug. Without stripping it, the `if test "$cmd" = "fish"`
+  check failed, and the literal string `-fish` was passed to `tmux rename-window`,
+  which parsed it as an unknown flag (`-f`). The strip itself needed `string replace
+  -r '^-' '' -- $cmd` (with `--`) because `string replace`'s own option parser
+  otherwise treats a leading-dash argument as a flag too — same class of bug one
+  layer down.
+
 - **2026-07-10** — For files that are almost entirely identical across OSes but
   contain a handful of OS-divergent lines: default to **whole-file duplication**
   (separate copy in `linux/` and `mac/`), not runtime OS-detection or file-splitting.
