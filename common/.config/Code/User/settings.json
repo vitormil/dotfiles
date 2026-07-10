@@ -251,7 +251,6 @@
     "REUSE_CONTEXT": "false"
   },
   "rubyLsp.customRubyCommand": "mise",
-  "rubyLsp.rubyExecutablePath": "/home/voliveira/.local/share/mise/installs/ruby/3.3.5/bin/ruby",
   "[erb]": {
     "editor.defaultFormatter": "Shopify.ruby-lsp"
   },

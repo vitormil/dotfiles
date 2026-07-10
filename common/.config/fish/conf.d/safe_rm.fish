@@ -6,5 +6,9 @@ function rm
                 return 1
         end
     end
-    command trash put $argv
+    if test (uname) = Darwin
+        command trash $argv
+    else
+        command trash put $argv
+    end
 end
