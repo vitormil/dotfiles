@@ -24,6 +24,8 @@ brew 'ripgrep'
 brew 'gh'
 brew 'fish'
 brew 'tmux'
+brew 'starship'
+brew 'fastfetch'
 
 brew 'wget'
 brew 'httpie'

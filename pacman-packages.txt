@@ -1,3 +1,4 @@
+fastfetch
 fish
 ghostty
 git-delta
