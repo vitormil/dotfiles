@@ -1,6 +1,6 @@
 set -g fish_greeting
 
-fastfetch
+nerdfetch
 
 starship init fish | source
 zoxide init fish | source

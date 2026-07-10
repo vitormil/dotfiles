@@ -25,7 +25,7 @@ brew 'gh'
 brew 'fish'
 brew 'tmux'
 brew 'starship'
-brew 'fastfetch'
+brew 'nerdfetch'
 
 brew 'wget'
 brew 'httpie'
