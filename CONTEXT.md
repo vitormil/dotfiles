@@ -65,10 +65,14 @@ that OS; equivalents are never stubbed out preemptively for a tool not yet in us
   `if-shell "uname | grep -q Darwin"` in tmux — consistent mechanism across both
   in-place rule-2-exception branches.
 
-- **2026-07-10** — `.tmux.conf`'s shell setting uses the bare command `fish`
-  (resolved via `$PATH`) rather than an OS-branched absolute path — avoids needing
-  `if-shell` and sidesteps Homebrew's Apple-Silicon-vs-Intel prefix difference
-  (`/opt/homebrew` vs `/usr/local`). Requires `fish` to be on `$PATH` on both OSes.
+- **2026-07-10 (superseded same day)** — `.tmux.conf`'s shell setting uses the bare
+  command `fish` rather than an absolute path. **Wrong**: tmux's `default-shell`
+  validation requires an absolute path starting with `/` and rejects a bare command
+  name outright ("not a suitable shell: fish"), regardless of `$PATH`. Replaced with
+  `run-shell 'tmux set-option -g default-shell "$(command -v fish)"'` at the top of
+  `.tmux.conf` — resolves the real absolute path at config-load time on whichever OS
+  it runs on (Homebrew Apple-Silicon vs Intel prefix, Arch's `/usr/bin/fish`, etc.),
+  no per-OS branching needed.
 
 - **2026-07-10** — `.config/fish/fish_variables` (fish's auto-generated universal
   variable store, containing this machine's baked-in absolute paths) is removed from
