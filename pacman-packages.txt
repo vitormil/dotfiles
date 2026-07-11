@@ -2,6 +2,7 @@ fish
 ghostty
 git-delta
 gum
+neovim
 powerline-fonts
 starship
 stow

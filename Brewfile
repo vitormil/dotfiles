@@ -25,6 +25,7 @@ brew 'gh'
 brew 'fish'
 brew 'tmux'
 brew 'starship'
+brew 'neovim'
 
 brew 'wget'
 brew 'httpie'
