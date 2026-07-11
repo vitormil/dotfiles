@@ -36,13 +36,24 @@ function _tmux_manual_rename
     string match -q "1" (tmux show-window-option -v @manual_rename 2>/dev/null)
 end
 
+function _tmux_folder_title
+    set -l git_root (git rev-parse --show-toplevel 2>/dev/null)
+    if test -z "$git_root"
+        echo " "(basename (pwd))
+    else if test "$git_root" = (pwd)
+        echo " "(basename $git_root)
+    else
+        echo " "(basename $git_root)/(basename (pwd))
+    end
+end
+
 function update_tmux_title --on-event fish_prompt
     if test -n "$TMUX"; and not _tmux_manual_rename
         set cmd (ps -o comm= -p $fish_pid 2>/dev/null | string trim | string split ' ')[1]
         set cmd (string replace -r '^-' '' -- $cmd)
 
         if test "$cmd" = "fish"
-            tmux rename-window (string replace -r "^$HOME" "~" (pwd))
+            tmux rename-window (_tmux_folder_title)
         else
             tmux rename-window (_tmux_lookup_title $cmd)
         end
