@@ -17,45 +17,25 @@ See [`CONTEXT.md`](./CONTEXT.md) for the reasoning behind this layout.
 cd
 git clone git@github.com:vitormil/dotfiles.git
 cd dotfiles
-./symlinks.sh
-```
 
-Detects the OS and stows `common` + `linux` or `common` + `mac`. Add `-f`/`--force` to adopt pre-existing files instead of failing on conflicts:
-
-```shell
-./symlinks.sh -f
-```
-
-### Packages
-
-```shell
 # Linux
-sudo pacman -S --needed - < pacman-packages.txt
-yay -S --needed - < aur-packages.txt
+./init-linux.sh
 
 # macOS
-brew bundle --file=Brewfile
+./init-mac.sh
 ```
 
-### Fish as default shell
+Installs packages (`pacman`/`yay` or `brew bundle`), sets `fish` as the default shell, clones `tpm`, copies Omarchy backgrounds (Linux only), then runs `./symlinks.sh` to stow the dotfiles. Both scripts fail loudly if their main package manager (`pacman`/`yay` or `brew`) isn't installed yet, with a link to install it.
+
+Add `-f`/`--force` to adopt pre-existing files instead of failing on conflicts (forwarded to `symlinks.sh`):
 
 ```shell
-chsh -s $(which fish)
+./init-mac.sh -f
 ```
 
 ### tmux plugins
 
-```shell
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-tmux   # then prefix + I to install plugins
-```
-
-### Omarchy backgrounds (Linux only)
-
-```shell
-rm ~/.config/omarchy/current/theme/backgrounds/*
-cp ~/dotfiles/backgrounds/* ~/.config/omarchy/current/theme/backgrounds
-```
+After the init script finishes, open tmux and press `prefix + I` to install tmux plugins — this step is interactive and can't be automated.
 
 ## License
 

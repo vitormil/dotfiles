@@ -115,3 +115,44 @@ that OS; equivalents are never stubbed out preemptively for a tool not yet in us
   fish `if test (uname) = Darwin`) may keep a single copy in `common/` using that
   syntax. This exception does not apply to formats with no conditional syntax (e.g.
   plain JSON) — those always duplicate under rule 1.
+
+- **2026-07-12** — Per-OS machine bootstrap lives in two new repo-root scripts,
+  `init-mac.sh` and `init-linux.sh` — not inside the `mac`/`linux` Stow packages,
+  since anything under those packages gets symlinked into `$HOME` and these scripts
+  are meant to run once, not live at a `$HOME` path. Consistent with the existing
+  "repo-governance files stay at root, un-stowed" rule above, extended to
+  machine-setup scripts. Each script installs that OS's packages, runs whatever
+  non-interactive customization is scriptable, and calls `./symlinks.sh` last (stowing
+  requires the packages symlinks depend on — e.g. `fish` — to already be installed).
+  The two scripts are fully independent (no shared sourced helper file), matching the
+  repo's existing duplication-over-abstraction convention for OS-divergent logic.
+
+- **2026-07-12** — `init-mac.sh`/`init-linux.sh` absorb every *non-interactive*
+  manual setup step previously documented in the README (package install, `chsh -s
+  $(which fish)`, cloning `tpm`, and — Linux only — the Omarchy backgrounds `rm`+`cp`,
+  including its destructive `rm`, which is accepted as a deliberate part of running
+  the init script rather than kept manual). The one step left manual is tmux's
+  `prefix + I` plugin install, which requires an interactive tmux session with a human
+  present and has no scriptable equivalent — each init script echoes a reminder for
+  it after running, and README documents it as the remaining manual step.
+
+- **2026-07-12** — Both init scripts accept an optional `-f`/`--force` flag and
+  forward it verbatim to `./symlinks.sh` at the end, rather than hardcoding
+  `--force` or omitting the flag entirely. Preserves `symlinks.sh`'s existing
+  "loud failure by default, `--adopt` only on request" safety property (see decision
+  above) while still letting a deliberate first-run pass it through in one command.
+
+- **2026-07-12** — Each script fails loudly and exits before doing anything if its
+  OS's main package manager isn't installed, rather than attempting to bootstrap it:
+  `init-mac.sh` checks for `brew` (message links to https://brew.sh); `init-linux.sh`
+  checks for both `pacman` and `yay` (`yay`'s message links to the Arch wiki's AUR
+  helpers page). The `pacman` check exists even though Arch/Omarchy always ships it,
+  specifically to give a clear "wrong OS" message (no link — there's nothing to
+  install) if someone runs `init-linux.sh` on a non-Arch Linux distro, rather than
+  failing confusingly deeper into the script.
+
+- **2026-07-12** — The `tpm` clone and `chsh` call in both init scripts are guarded
+  (`[ -d ~/.tmux/plugins/tpm ] || git clone ...`; only run `chsh` if the shell isn't
+  already `fish`) so that re-running the init script on an already-set-up machine is
+  safe — `git clone` into an existing directory fails outright, and `chsh` otherwise
+  reprompts for a password every run even when there's nothing to change.
