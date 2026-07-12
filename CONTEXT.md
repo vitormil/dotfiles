@@ -156,3 +156,12 @@ that OS; equivalents are never stubbed out preemptively for a tool not yet in us
   already `fish`) so that re-running the init script on an already-set-up machine is
   safe — `git clone` into an existing directory fails outright, and `chsh` otherwise
   reprompts for a password every run even when there's nothing to change.
+
+- **2026-07-12** — `mise` is reserved for language/runtime version management
+  (`node`, `ruby`, `bun` in `common/.config/mise/config.toml`). Standalone CLI tools
+  (e.g. `lazygit`, added for tmux's new `bind g` popup) are installed via the OS
+  package manager instead (`Brewfile` on Mac, `pacman-packages.txt` on Linux — it's
+  in Arch's `extra` repo, no AUR needed) even when mise has a plugin/backend for
+  them. Keeps a single install path per OS (`brew bundle` / `init-linux.sh`) rather
+  than needing both `mise install` and a package-manager install depending on the
+  tool.

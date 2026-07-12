@@ -17,3 +17,4 @@ tig
 libvips
 openslide
 flameshot
+lazygit

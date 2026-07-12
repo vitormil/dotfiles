@@ -26,6 +26,7 @@ brew 'fish'
 brew 'tmux'
 brew 'starship'
 brew 'neovim'
+brew 'lazygit'
 
 brew 'wget'
 brew 'httpie'
