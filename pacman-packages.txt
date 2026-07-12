@@ -1,5 +1,6 @@
 fish
 ghostty
+github-cli
 git-delta
 gum
 neovim

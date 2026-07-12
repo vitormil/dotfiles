@@ -165,3 +165,22 @@ that OS; equivalents are never stubbed out preemptively for a tool not yet in us
   them. Keeps a single install path per OS (`brew bundle` / `init-linux.sh`) rather
   than needing both `mise install` and a package-manager install depending on the
   tool.
+
+- **2026-07-12** — `gh` (GitHub CLI) is added to `pacman-packages.txt` as
+  `github-cli` — it was already in `Brewfile` for Mac but missing from Linux
+  provisioning entirely, so `init-linux.sh` had no path to installing it.
+
+- **2026-07-12** — `gh-dash` (a `gh` extension, not a standalone binary) is
+  installed via `gh extension install dlvhdr/gh-dash`, added identically to both
+  `init-mac.sh` and `init-linux.sh` right after each script's package-manager step.
+  This departs from the `lazygit`/`mise` precedent above ("standalone CLI tools go
+  through the OS package manager") because gh-dash doesn't fit that mold: it has no
+  Homebrew formula at all, and while an AUR package exists, upstream's only
+  documented install path is the `gh extension` mechanism. Using `gh extension
+  install` uniformly on both OSes gives one install command instead of two
+  divergent ones, and the command is already idempotent (exits 0, warns if already
+  installed) so no guard is needed — matching the unguarded style of the `brew
+  bundle`/`pacman -S --needed` lines it sits next to. No `config.yml` is tracked
+  under `common/.config/gh-dash/` yet — same "grow organically" rule as the
+  `linux`/`mac` packages: add one once there's an actual customization to make. No
+  tmux popup keybind was added either, for the same reason.

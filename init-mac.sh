@@ -8,6 +8,8 @@ fi
 
 brew bundle --file=Brewfile
 
+gh extension install dlvhdr/gh-dash
+
 if [ ! -d ~/.tmux/plugins/tpm ]; then
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 fi

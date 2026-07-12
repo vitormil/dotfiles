@@ -14,6 +14,8 @@ fi
 sudo pacman -S --needed - <pacman-packages.txt
 yay -S --needed - <aur-packages.txt
 
+gh extension install dlvhdr/gh-dash
+
 if [ ! -d ~/.tmux/plugins/tpm ]; then
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 fi
