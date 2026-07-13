@@ -1,6 +1,7 @@
 cask_args appdir: '/Applications'
 
 brew 'stow'
+
 brew 'git'
 brew 'tig'
 brew 'git-delta'
@@ -34,6 +35,10 @@ brew 'mise'
 brew 'fzf'
 brew 'zoxide'
 brew 'sesh'
+
+brew 'libpq'
+
+brew 'docker-credential-helper'
 
 cask 'font-hack-nerd-font'
 cask 'font-jetbrains-mono-nerd-font'
