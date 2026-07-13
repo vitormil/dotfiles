@@ -9,3 +9,7 @@ if test -f ~/private.sh
 end
 
 set -g font "Fira Code Nerd Font"
+
+### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
+set --export --prepend PATH "/Users/vitor.oliveira/.rd/bin"
+### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)
