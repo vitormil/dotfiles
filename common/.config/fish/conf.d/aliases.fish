@@ -9,7 +9,7 @@ alias t="tig"
 
 alias bi="bundle install"
 alias o="open ."
-alias c="code ."
+alias c="code --new-window ."
 alias n="nvim"
 function e
     if test (uname) = Darwin
