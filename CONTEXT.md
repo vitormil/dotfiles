@@ -198,3 +198,13 @@ that OS; equivalents are never stubbed out preemptively for a tool not yet in us
   under `common/.config/gh-dash/` yet — same "grow organically" rule as the
   `linux`/`mac` packages: add one once there's an actual customization to make. No
   tmux popup keybind was added either, for the same reason.
+
+- **2026-07-13** — `common/.config/fish/conf.d/aliases.fish`'s `e` (env | fzf |
+  clipboard) alias became a function branching `if test (uname) = Darwin` (rule 2
+  exception, same shape as `safe_rm.fish`): Mac pipes to `pbcopy`, Linux to
+  `wl-copy`. `xclip` was removed from `pacman-packages.txt` and replaced with
+  `wl-clipboard` — Linux provisioning targets Hyprland (Wayland; see
+  `linux/.config/hypr/`), and `xclip` only reaches the clipboard via an X11/XWayland
+  bridge that isn't guaranteed present, while `wl-copy` talks to the Wayland
+  clipboard natively. `xclip` had no other references in the repo, so the swap was
+  a clean removal, not a duplication.

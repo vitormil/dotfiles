@@ -11,7 +11,13 @@ alias bi="bundle install"
 alias o="open ."
 alias c="code ."
 alias n="nvim"
-alias e="env | fzf | pbcopy"
+function e
+    if test (uname) = Darwin
+        env | fzf | pbcopy
+    else
+        env | fzf | wl-copy
+    end
+end
 alias vim="nvim"
 
 alias r="bin/rails"

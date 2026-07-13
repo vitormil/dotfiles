@@ -12,7 +12,7 @@ tmux
 ttf-dejavu
 ttf-fira-code
 visual-studio-code-bin
-xclip
+wl-clipboard
 zoxide
 tig
 libvips
