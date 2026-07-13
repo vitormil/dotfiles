@@ -208,3 +208,12 @@ that OS; equivalents are never stubbed out preemptively for a tool not yet in us
   bridge that isn't guaranteed present, while `wl-copy` talks to the Wayland
   clipboard natively. `xclip` had no other references in the repo, so the swap was
   a clean removal, not a duplication.
+
+- **2026-07-13** — `sup` (pacman) and `bup` (brew) aliases merged into a single
+  `update-packages` function with alias `up`, branching `if test (uname) = Darwin`
+  (rule 2 exception, same shape as `e`/`safe_rm.fish`). The old names were dropped
+  rather than kept as aliases for `up`/`update-packages` — `sup`/`bup` encoded which
+  package manager they ran, which stopped being true once one name covers both
+  OSes. Status echo lines from both original aliases are preserved verbatim inside
+  the branches; the `# system upgrade (verbose)` comment above them was dropped
+  since the function name now states that directly.

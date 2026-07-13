@@ -34,6 +34,18 @@ alias dcu="docker-compose up"
 alias dcud="docker-compose up -d"
 alias dcd="docker-compose down"
 
-# system upgrade (verbose)
-alias sup="echo 'Updating system packages...' && sudo pacman -Syu --noconfirm --verbose"
-alias bup="echo 'brew update...' && brew update -v && echo '\nbrew upgrade...' && brew upgrade -v && echo '\nbrew upgrade --cask...' && brew upgrade --cask --verbose"
+function update-packages
+    if test (uname) = Darwin
+        echo 'brew update...'
+        brew update -v
+        echo 'brew upgrade...'
+        brew upgrade -v
+        echo 'brew upgrade --cask...'
+        brew upgrade --cask --verbose
+    else
+        echo 'Updating system packages...'
+        sudo pacman -Syu --noconfirm --verbose
+    end
+    echo '🍻'
+end
+alias up="update-packages"
