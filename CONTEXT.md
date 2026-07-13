@@ -79,10 +79,24 @@ that OS; equivalents are never stubbed out preemptively for a tool not yet in us
   the repo and gitignored — it's regenerated state, not authored config, and must not
   be carried across machines.
 
-- **2026-07-10** — `~/private.fish` is intentionally untracked, machine-local secrets
+- **2026-07-10** — `~/private.sh` is intentionally untracked, machine-local secrets
   sourced by `config.fish` (or its `conf.d` replacement) — guarded with a
-  `test -f ~/private.fish` existence check rather than an unconditional `source`,
-  since the file won't exist until created by hand per machine.
+  `test -f ~/private.sh` existence check rather than an unconditional `source`,
+  since the file won't exist until created by hand per machine. (Originally
+  documented as `~/private.fish`; corrected 2026-07-13 to match the file that
+  actually exists on disk — see below for why it's bash, not fish, syntax.)
+
+- **2026-07-13** — `~/private.sh` is bash syntax (it sources a much larger,
+  externally-maintained bash environment file with variable assignments,
+  `$(...)`, bash-style `unset`, etc. — not something to hand-translate to fish).
+  fish's own `source` can't parse it, so `config.fish` calls a new
+  `source_bash_env` function (`common/.config/fish/conf.d/source_bash_env.fish`)
+  instead: it runs the script in a real `bash` subshell, diffs `env` before and
+  after, and `set -gx`s whatever changed. Chosen over installing a plugin manager
+  + `bass` (the standard fish solution to this exact problem) to avoid adding a
+  new dependency for a ~10-line problem — matches this repo's existing style of
+  small hand-rolled functions in `conf.d` (`jump.fish`, `take.fish`) over pulling
+  in a plugin ecosystem.
 
 - **2026-07-10** — `common/add_path.fish` splits into `linux/` and `mac/` copies
   (rule 1): Linux keeps its `/mnt/vault2/shell/trash` mount path; Mac adds
