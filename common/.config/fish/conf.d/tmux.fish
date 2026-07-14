@@ -36,6 +36,10 @@ function _tmux_manual_rename
     string match -q "1" (tmux show-window-option -v @manual_rename 2>/dev/null)
 end
 
+function _tmux_claude_title
+    echo "✨ Claude ["(basename (pwd))"]"
+end
+
 function _tmux_folder_title
     set -l git_root (git rev-parse --show-toplevel 2>/dev/null)
     if test -z "$git_root"
@@ -49,6 +53,11 @@ end
 
 function update_tmux_title --on-event fish_prompt
     if test -n "$TMUX"; and not _tmux_manual_rename
+        if set -q __tmux_claude_running
+            tmux rename-window (_tmux_claude_title)
+            return
+        end
+
         set cmd (ps -o comm= -p $fish_pid 2>/dev/null | string trim | string split ' ')[1]
         set cmd (string replace -r '^-' '' -- $cmd)
 
@@ -63,6 +72,19 @@ end
 function fish_preexec --on-event fish_preexec
     if test -n "$TMUX"; and not _tmux_manual_rename
         set cmd (string split ' ' $argv[1])[1]
+
+        if test "$cmd" = "claude"
+            set -g __tmux_claude_running 1
+            tmux rename-window (_tmux_claude_title)
+            return
+        end
+
         tmux rename-window (_tmux_lookup_title $cmd)
+    end
+end
+
+function fish_postexec --on-event fish_postexec
+    if set -q __tmux_claude_running
+        set -e __tmux_claude_running
     end
 end
