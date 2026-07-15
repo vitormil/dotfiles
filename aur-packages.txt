@@ -5,3 +5,4 @@ trashy
 trimage-git
 vicinae-bin
 tofi
+fabric-ai

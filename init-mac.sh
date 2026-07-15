@@ -7,6 +7,7 @@ if ! command -v brew &>/dev/null; then
 fi
 
 brew bundle --file=Brewfile
+brew link --force libpq
 
 gh extension install dlvhdr/gh-dash
 

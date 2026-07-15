@@ -36,6 +36,27 @@ function _tmux_manual_rename
     string match -q "1" (tmux show-window-option -v @manual_rename 2>/dev/null)
 end
 
+function _tmux_manual_rename_for_target
+    set -l target $argv[1]
+    string match -q "1" (tmux show-window-option -v -t $target @manual_rename 2>/dev/null)
+end
+
+function _tmux_pane_focus_rename
+    set -l pane_id $argv[1]
+    test -z "$pane_id"; and return
+    if _tmux_manual_rename_for_target $pane_id
+        return
+    end
+    set -l cmd (tmux display-message -p -t $pane_id '#{pane_current_command}')
+    set -l path (tmux display-message -p -t $pane_id '#{pane_current_path}')
+    cd $path 2>/dev/null
+    if test "$cmd" = "fish"
+        tmux rename-window -t $pane_id (_tmux_folder_title)
+    else
+        tmux rename-window -t $pane_id (_tmux_lookup_title $cmd)
+    end
+end
+
 function _tmux_claude_title
     echo "✨ Claude ["(basename (pwd))"]"
 end

@@ -26,10 +26,13 @@
 # # The config file consists of simple key-value pairs,
 # # separated by equals signs.
 font-family=Fira Code Nerd Font
-font-size=16
+font-size=18
 window-padding-x=2
 window-padding-y=2
-theme=AtomOneDarkVitor
+title="👻"
+fullscreen=non-native-visible-menu
+confirm-close-surface=false
+
 #
 # # Spacing around the equals sign does not matter.
 # # All of these are identical:

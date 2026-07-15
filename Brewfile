@@ -17,6 +17,7 @@ brew 'jq'
 brew 'fd'
 brew 'fx'
 brew 'zenith'
+brew 'gpg'
 
 brew 'gnu-sed'
 brew 'the_silver_searcher'
@@ -39,6 +40,8 @@ brew 'sesh'
 brew 'libpq'
 
 brew 'docker-credential-helper'
+
+brew 'fabric-ai'
 
 cask 'font-hack-nerd-font'
 cask 'font-jetbrains-mono-nerd-font'

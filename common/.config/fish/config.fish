@@ -4,8 +4,8 @@ starship init fish | source
 zoxide init fish | source
 mise activate fish | source
 
-if test -f ~/private.sh
-    source_bash_env ~/private.sh
+if test -f ~/private/init.fish
+    source_bash_env ~/private/init.fish
 end
 
 set -g font "Fira Code Nerd Font"

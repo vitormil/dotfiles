@@ -23,9 +23,10 @@ alias vim="nvim"
 alias r="bin/rails"
 alias deploy="bin/deploy"
 alias dev="bin/dev"
+alias fabric="fabric-ai"
 
 alias htop="zenith"
-alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
+alias ff="fzf --preview '[ -d {} ] && tree -C {} | head -200 || bat --style=numbers --color=always --line-range :500 {}' --preview-window=wrap"
 
 alias ni="npm install"
 alias ns="npm run start"
@@ -33,6 +34,7 @@ alias ns="npm run start"
 alias dcu="docker-compose up"
 alias dcud="docker-compose up -d"
 alias dcd="docker-compose down"
+alias quote="ruby ~/vitor/quotes/quote.rb --color"
 
 function update-packages
     if test (uname) = Darwin

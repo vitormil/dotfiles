@@ -9,3 +9,9 @@ disabled = true
 
 [maven]
 disabled = true
+
+[package]
+disabled = true
+
+[java]
+style = 'bold #ED8B00'
