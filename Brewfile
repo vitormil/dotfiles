@@ -18,6 +18,7 @@ brew 'fd'
 brew 'fx'
 brew 'zenith'
 brew 'gpg'
+brew 'pinentry-mac'
 
 brew 'gnu-sed'
 brew 'the_silver_searcher'
