@@ -1,3 +1,11 @@
 #!/bin/bash
 
-alias tt="tmux -S /tmp/tmux-$(id -u)/trustly new-session -A -s trustly"
+function tt
+  set -l socket /tmp/tmux-(id -u)/trustly
+  set -l selection (cat ~/private/.tmux-sessions | fzf)
+  if test -n "$selection"
+    tmux -S $socket new-session -A -s "$selection"
+  else
+    echo "tt aborted."
+  end
+end
