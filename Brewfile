@@ -35,7 +35,6 @@ brew 'httpie'
 brew 'mise'
 brew 'fzf'
 brew 'zoxide'
-brew 'sesh'
 
 brew 'libpq'
 
