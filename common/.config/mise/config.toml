@@ -1,5 +1,6 @@
 [tools]
-node = "22.14.0"
+node = "24.18.0"
+npm = "11.16.0"
 ruby = "3.3.5"
 bun = "latest"
 java = "temurin-21.0.3+9.0.LTS"
