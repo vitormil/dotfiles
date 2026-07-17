@@ -14,6 +14,7 @@ ttf-fira-code
 visual-studio-code-bin
 wl-clipboard
 zoxide
+atuin
 tig
 libvips
 openslide

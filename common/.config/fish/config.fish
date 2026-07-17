@@ -3,6 +3,7 @@ set -g fish_greeting
 starship init fish | source
 zoxide init fish | source
 mise activate fish | source
+atuin init fish --disable-up-arrow | source
 
 if test -f ~/private/init.fish
     source_bash_env ~/private/init.fish

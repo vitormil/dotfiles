@@ -35,6 +35,7 @@ brew 'httpie'
 brew 'mise'
 brew 'fzf'
 brew 'zoxide'
+brew 'atuin'
 
 brew 'libpq'
 
