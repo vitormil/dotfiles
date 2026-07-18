@@ -6,6 +6,7 @@ bun = "latest"
 java = "temurin-21.0.3+9.0.LTS"
 maven = "3.9.16"
 pnpm = "11.10.0"
+"github:akitaonrails/ai-jail" = "latest"
 
 [settings]
 idiomatic_version_file_enable_tools = ["ruby", "node"]
