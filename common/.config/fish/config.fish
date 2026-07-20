@@ -6,7 +6,7 @@ mise activate fish | source
 atuin init fish --disable-up-arrow | source
 
 if test -f ~/private/init.fish
-    source_bash_env ~/private/init.fish
+    source ~/private/init.fish
 end
 
 set -g font "Fira Code Nerd Font"
