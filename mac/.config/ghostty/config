@@ -1,0 +1,2 @@
+config-file = ~/.config/ghostty/config-base
+fullscreen = non-native-visible-menu
