@@ -7,6 +7,8 @@ atuin init fish --disable-up-arrow | source
 
 if test -f ~/private/init.fish
     source ~/private/init.fish
+else if test -f ~/private/init.sh
+    source_bash_env ~/private/init.sh
 end
 
 set -g font "Fira Code Nerd Font"
