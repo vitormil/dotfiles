@@ -11,6 +11,7 @@ the_silver_searcher
 tmux
 ttf-dejavu
 ttf-fira-code
+ttf-firacode-nerd
 visual-studio-code-bin
 wl-clipboard
 zoxide

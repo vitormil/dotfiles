@@ -24,6 +24,14 @@ lives in its own package under the same relative path). These packages are grown
 organically — a tool's config is added only once that tool is actually configured on
 that OS; equivalents are never stubbed out preemptively for a tool not yet in use.
 
+### Contested path
+A path under `$HOME` that this repo wants to own but that a third party — in
+practice Omarchy, via its migration scripts — also writes to. A contested path
+cannot be managed by leaving it empty: an upstream "create if absent" migration
+will simply fill it, and whatever lands there can silently outrank this repo's
+config. The repo must place a Stow-managed symlink at the path so upstream sees
+it as already present.
+
 ## Decisions
 
 - **2026-07-10** — Repo restructured into three Stow packages (`common`, `linux`,
@@ -73,6 +81,44 @@ that OS; equivalents are never stubbed out preemptively for a tool not yet in us
   `.tmux.conf` — resolves the real absolute path at config-load time on whichever OS
   it runs on (Homebrew Apple-Silicon vs Intel prefix, Arch's `/usr/bin/fish`, etc.),
   no per-OS branching needed.
+
+- **2026-07-21** — tmux config lives at `common/.config/tmux/tmux.conf`, not
+  `common/.tmux.conf`. Omarchy ships its own `~/.config/tmux/tmux.conf`, and tmux
+  loads *every* file in its search list (`/etc/tmux.conf:~/.tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf:~/.config/tmux/tmux.conf`)
+  in order, so the XDG path wins over `~/.tmux.conf`. Omarchy's file was therefore
+  overriding this repo's config at server start on Linux while Mac loaded it
+  cleanly — the main reason the two machines looked different. Owning the
+  contested path both wins the precedence contest and stops Omarchy's
+  "create if absent" migrations refilling it. TPM independently prefers this
+  location. Omarchy's displaced file is backed up at
+  `~/.config/tmux/tmux.conf.omarchy-backup-2026-07-21`.
+
+- **2026-07-21** — Config must be correct at tmux server start; no runtime
+  patching. Removed the `tmux source ~/.tmux.conf` call that ran on every
+  interactive fish shell. It existed to re-assert config over the shadowing
+  described above, which meant the real bug stayed invisible for as long as it
+  did. Reloads are deliberate, via `prefix + r`.
+
+- **2026-07-21** — Only Omarchy's copy-mode bindings were adopted into this
+  repo (`mode-keys vi` plus `v`/`y`); its `M-*` window and pane bindings were
+  deliberately not. Window switching already happens a layer down, in Ghostty's
+  `keybind = ctrl+N=text:\x01N`, which behaves identically on both OSes.
+  `mode-keys` is now set explicitly because tmux otherwise derives it from
+  `$EDITOR`, which this repo does not set and which differs per machine.
+
+- **2026-07-21** — Plugin versions are pinned, but the mechanism is split
+  because TPM installs with `git clone -b <ref>`, which takes a branch or tag
+  and not a commit. Only catppuccin has usable tags, so it is pinned in
+  `tmux.conf`; the rest are untagged upstream or have tags years behind master
+  (tmux-continuum's newest tag predates its master by nine years), so
+  `bin/pin-tmux-plugins.sh` re-pins them to recorded commits after
+  `prefix + I`. Upgrades are a deliberate SHA bump in that script.
+
+- **2026-07-21** — A font named in a config must also be named in that OS's
+  package manifest. `config-base` asked for `Fira Code Nerd Font` while neither
+  manifest installed it, so each OS silently fell back through a different font
+  matcher (fontconfig vs CoreText) to a different face, with different cell
+  metrics. Added `ttf-firacode-nerd` and `cask 'font-fira-code-nerd-font'`.
 
 - **2026-07-10** — `.config/fish/fish_variables` (fish's auto-generated universal
   variable store, containing this machine's baked-in absolute paths) is removed from

@@ -16,9 +16,10 @@ yay -S --needed - <aur-packages.txt
 
 gh extension install dlvhdr/gh-dash
 
-if [ ! -d ~/.tmux/plugins/tpm ]; then
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+if [ ! -d ~/.config/tmux/plugins/tpm ]; then
+  git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
 fi
+./bin/pin-tmux-plugins.sh
 
 if [ "$SHELL" != "$(which fish)" ]; then
   chsh -s "$(which fish)"
@@ -30,4 +31,5 @@ cp backgrounds/* ~/.config/omarchy/current/theme/backgrounds
 ./symlinks.sh "$@"
 
 echo
-echo "Open tmux and press prefix + I to install tmux plugins."
+echo "Open tmux and press prefix + I to install tmux plugins,"
+echo "then run ./bin/pin-tmux-plugins.sh to pin them to the recorded commits."

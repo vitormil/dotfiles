@@ -43,6 +43,7 @@ brew 'docker-credential-helper'
 
 brew 'fabric-ai'
 
+cask 'font-fira-code-nerd-font'
 cask 'font-hack-nerd-font'
 cask 'font-jetbrains-mono-nerd-font'
 cask 'meetingbar'

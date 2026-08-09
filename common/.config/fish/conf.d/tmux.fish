@@ -1,7 +1,3 @@
-if status is-interactive
-    tmux source ~/.tmux.conf >/dev/null 2>&1
-end
-
 set -g tmux_custom_names \
     "bin/dev"   "💻 Server" \
     "bin/jobs"   "🗂 SolidQueue" \
