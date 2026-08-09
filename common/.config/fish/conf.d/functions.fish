@@ -1,10 +1,22 @@
 #!/bin/bash
 
 function tt
-  set -l socket /tmp/tmux-(id -u)/trustly
+  set -l session_name
+  if test (uname) = Linux
+    set session_name vitor
+  else
+    set session_name trustly
+  end
+  set -l uid (id -u)
+  set -l socket /tmp/tmux-$uid/$session_name
+  mkdir -p /tmp/tmux-$uid
   set -l selection (cat ~/private/.tmux-sessions | fzf)
   if test -n "$selection"
-    tmux -S $socket new-session -A -s "$selection"
+    if tmux -S $socket has-session -t "$selection" 2>/dev/null
+      tmux -S $socket attach-session -t "$selection"
+    else
+      tmux -S $socket new-session -s "$selection"
+    end
   else
     echo "tt aborted."
   end
