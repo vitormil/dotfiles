@@ -282,5 +282,7 @@
   "chat.tools.terminal.autoApprove": {
     "printf": true,
     "awk": true
-  }
+  },
+  "workbench.activityBar.autoHide": false,
+  "workbench.activityBar.compact": true
 }

@@ -97,3 +97,6 @@
   hunk-header-file-style = yellow
   hunk-header-line-number-style = yellow
   hunk-header-style = file line-number syntax
+[merge "pom"]
+  name = Automatically resolve project and/or parent version conflicts in pom files. The rest is a normal merge.
+  driver = java -jar -client -Xms32m -Xmx32m ~/paywithmybank/pomutils/pomutils-1.7.0.jar merge --base=%O --our=%A --their=%B
