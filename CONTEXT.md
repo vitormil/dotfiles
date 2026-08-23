@@ -124,3 +124,35 @@ it as already present.
   variable store, containing this machine's baked-in absolute paths) is removed from
   the repo and gitignored — it's regenerated state, not authored config, and must not
   be carried across machines.
+
+- **2026-08-23** — Omarchy's upgrade to "Quattro" (package-backed layout, v4.0.0)
+  switched Hyprland's config format from `.conf` to Lua. It scaffolded fresh
+  `~/.config/hypr/{hyprland,monitors,input,bindings,looknfeel,autostart}.lua` and
+  `.luarc.json` as plain files (confirmed via `journalctl`: Hyprland loads
+  `hyprland.lua` exclusively, never `hyprland.conf`), leaving this repo's six
+  `hypr/*.conf` symlinks in place but dead — silently unread. Same shape as the
+  earlier tmux.conf fix: another **Contested path**. Resolved the same way — the
+  six `.lua` files plus `.luarc.json` now live in `linux/.config/hypr/` and are
+  Stow-managed; the `.conf` files were deleted from the repo (their content fully
+  ported, not archived — Linux-only, no cross-OS reason to keep a dead format
+  around). `hyprland.conf` itself (not repo-managed) was deleted from `$HOME` since
+  Hyprland never reads it; Omarchy's own `*.bak`/`*.bkp0` upgrade-safety-net files
+  were left alone. Porting surfaced two bugs the old `.conf` chain had been masking:
+  `envs.conf` set `decoration.rounding = 5` but `looknfeel.conf` (sourced later, so
+  it won by Hyprland's last-source-wins semantics) set `rounding = 4` — the file
+  actually never used is the one a naive line-by-line port would have picked, since
+  it groups with the other `general`/`decoration` settings; ported forward as `4`,
+  the value that was actually rendering. Separately, Omarchy's freshly-scaffolded
+  `monitors.lua` set `GDK_SCALE=2` / `scale = "auto"` against this 3440x1440
+  ultrawide, which Hyprland's own auto-scale resolves to `1` — a live GDK/monitor
+  scale mismatch (oversized GTK app UI) that the previous explicit `GDK_SCALE=1` /
+  `scale = 1` never had; restored the explicit `1`. `envs.conf`'s two
+  `hyprecise`-tool env vars had no matching slot in Omarchy's new per-concern file
+  split (no personal `envs.lua` is scaffolded), so a `hypr/envs.lua` was added and
+  wired in via an extra `require("hypr.envs")` in `hyprland.lua`, mirroring
+  Omarchy's own `default.hypr.envs` module. `stow -t ~ common linux` failed
+  atomically due to two unrelated pre-existing conflicts the same Quattro upgrade
+  left behind (`~/.config/nvim/lua/config/options.lua`,
+  `~/.config/tmux/tmux.conf` — both real files, not yet reconciled) — worked
+  around by symlinking the eight hypr files by hand with `ln -s`, matching Stow's
+  naming exactly; those two conflicts are still unresolved and out of scope here.
