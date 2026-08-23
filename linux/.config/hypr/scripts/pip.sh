@@ -8,14 +8,15 @@ set -euo pipefail
 # Chrome exposes no native keyboard shortcut for PiP, so the actual trigger is
 # the `pip-toggle` extension (linux/.local/share/chromium-extensions/), which
 # registers the action on Alt+Shift+Y. This script injects that key into the
-# right window via `hyprctl dispatch sendshortcut`.
+# right window via `hyprctl dispatch` + `hl.dsp.send_shortcut`.
 #
 # The INITIAL size and position come from the window rules on the `pip` tag, in
-# ~/.config/hypr/looknfeel.conf. The second size is computed here from the
-# window's live geometry -- deliberately, so the looknfeel.conf constants are
+# ~/.config/hypr/looknfeel.lua. The second size is computed here from the
+# window's live geometry -- deliberately, so the looknfeel.lua constants are
 # not duplicated in two places that can drift apart over time.
 
-SHORTCUT="ALT SHIFT, Y"
+SHORTCUT_MODS="ALT SHIFT"
+SHORTCUT_KEY="Y"
 BROWSERS='^([cC]hrom(e|ium)|[bB]rave-browser|[mM]icrosoft-edge|Vivaldi-stable)$'
 
 # Second size, as a percentage of the first. It is linear (each side grows by
@@ -60,7 +61,7 @@ fi
 
 # --- PiP closed: open it at the base size ---
 if [ -z "$pip" ]; then
-  hyprctl dispatch sendshortcut "$SHORTCUT, address:$addr"
+  hyprctl dispatch "hl.dsp.send_shortcut({ mods = \"$SHORTCUT_MODS\", key = \"$SHORTCUT_KEY\", window = \"address:$addr\" })"
   printf '%s 1\n' "$addr" >"$STATE"
   exit 0
 fi
@@ -104,8 +105,8 @@ if [ "${step:-2}" = 1 ]; then
   ny=$((my + mh - gap_b - nh))
 
   hyprctl --batch "\
-    dispatch resizewindowpixel exact $nw $nh,address:$pip_addr ; \
-    dispatch movewindowpixel exact $nx $ny,address:$pip_addr"
+    dispatch hl.dsp.window.resize({ x = $nw, y = $nh, relative = false, window = \"address:$pip_addr\" }) ; \
+    dispatch hl.dsp.window.move({ x = $nx, y = $ny, relative = false, window = \"address:$pip_addr\" })"
 
   printf '%s 2\n' "$addr" >"$STATE"
   exit 0
@@ -113,9 +114,9 @@ fi
 
 # --- step 2 (or a PiP opened outside the cycle, e.g. via the extension button,
 # leaving no recorded state): close it and hand focus back ---
-hyprctl dispatch sendshortcut "$SHORTCUT, address:$addr"
+hyprctl dispatch "hl.dsp.send_shortcut({ mods = \"$SHORTCUT_MODS\", key = \"$SHORTCUT_KEY\", window = \"address:$addr\" })"
 
-# `focuswindow` already switches workspaces when the window lives on another
-# one, which covers "jump to the right desktop and focus Chrome".
-hyprctl dispatch focuswindow "address:$addr"
+# `focus` already switches workspaces when the window lives on another one,
+# which covers "jump to the right desktop and focus Chrome".
+hyprctl dispatch "hl.dsp.focus({ window = \"address:$addr\" })"
 rm -f "$STATE"
