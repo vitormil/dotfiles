@@ -156,3 +156,21 @@ it as already present.
   `~/.config/tmux/tmux.conf` — both real files, not yet reconciled) — worked
   around by symlinking the eight hypr files by hand with `ln -s`, matching Stow's
   naming exactly; those two conflicts are still unresolved and out of scope here.
+
+- **2026-08-24** — `voliveira.clock` (an Omarchy shell "clone" of the stock
+  `omarchy.clock` bar widget, made to add seconds to the topbar clock) moved into
+  `linux/.config/omarchy/plugins/voliveira.clock/` and Stow-managed. It was a plain
+  real directory Omarchy's plugin-clone action had created under
+  `~/.config/omarchy/plugins/`, so once removed from `$HOME` it folds to a single
+  clean directory symlink — no per-file adoption needed, unlike the hypr case above.
+  `~/.config/omarchy/shell.json` (the shell's bar-layout/settings store, including
+  this widget's chosen label format) stays untracked and unstowed: like
+  `fish_variables`, it's regenerated state the app rewrites on every settings
+  change, not authored config. The only on-disk edit made by hand before this move
+  was `BarWidget.qml`'s `SystemClock.precision: Minutes -> Seconds`; that edit is
+  preserved as-is. Went further and gave the seconds format a real home in
+  `Model.js`'s `CLOCK_FORMATS`/`VERTICAL_CLOCK_FORMATS` preset rings (`dddd
+  HH:mm:ss` / `h:mm:ss AP` pairs, plus a `HH\nmm\nss` vertical entry) instead of
+  leaving it a hand-typed value living only in `shell.json` — the format actually
+  in use (`dddd HH:mm:ss`) was not one of the widget's own cycle-through presets,
+  so the next right-click on the clock would have silently dropped it for good.
