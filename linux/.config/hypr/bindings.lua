@@ -23,12 +23,28 @@ o.bind("SUPER + M", "YouTube Music", 'omarchy-launch-webapp "https://music.youtu
 o.bind("SUPER + SHIFT + W", "WhatsApp", 'omarchy-launch-webapp "https://web.whatsapp.com/"')
 o.bind("SUPER + X", "X", 'omarchy-launch-webapp "https://x.com/i/lists/101391290"')
 
--- hyprecise: mouse pointer precision nudges.
-local hyprecise = "sh " .. os.getenv("HOME") .. "/.config/hyprecise/hyprecise"
-o.bind("SUPER + ALT + Up", nil, hyprecise .. " up")
-o.bind("SUPER + ALT + Down", nil, hyprecise .. " down")
-o.bind("SUPER + ALT + Right", nil, hyprecise .. " right")
-o.bind("SUPER + ALT + Left", nil, hyprecise .. " left")
+-- hyprecise: step the focused column's WIDTH through a ladder of sizes, with
+-- the other columns splitting what is left over equally. Runs in-process --
+-- no subprocess, no hyprctl, no jq.
+local hyprecise_path = os.getenv("HOME") .. "/.config/hyprecise/hyprecise.lua"
+local hyprecise_opts = {
+  mode = "auto", -- auto | wide | compact  (auto: >=3440px uses sixths)
+  loop = true, -- wrap around the ends of the ladder
+  min_width = nil, -- floor for a non-focused column; nil = monitor/12
+}
+
+-- dofile on every press, so edits to hyprecise.lua take effect without
+-- reloading Hyprland. pcall so a bug in it can never take the compositor down.
+for _, direction in ipairs({ "Left", "Right", "Up", "Down" }) do
+  o.bind("SUPER + ALT + " .. direction, nil, function()
+    local ok, err = pcall(function()
+      dofile(hyprecise_path)(direction:lower(), hyprecise_opts)
+    end)
+    if not ok then
+      hl.notification.create({ text = "hyprecise: " .. tostring(err), duration = 5000 })
+    end
+  end)
+end
 
 -- vicinae
 o.bind("SHIFT + ALT + Space", nil, "vicinae vicinae://toggle")
