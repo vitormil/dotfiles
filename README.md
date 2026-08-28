@@ -37,6 +37,14 @@ Add `-f`/`--force` to adopt pre-existing files instead of failing on conflicts (
 
 After the init script finishes, open tmux and press `prefix + I` to install tmux plugins — this step is interactive and can't be automated.
 
+### hyprecise (Linux)
+
+Window resizing lives in its own repo, [vitormil/hyprecise](https://github.com/vitormil/hyprecise), and is not vendored here. `hypr/bindings.lua` loads it unconditionally, so clone it before reloading Hyprland:
+
+```shell
+git clone git@github.com:vitormil/hyprecise.git ~/.config/hyprecise
+```
+
 ## License
 
 MIT.
