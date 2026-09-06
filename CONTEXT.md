@@ -32,6 +32,15 @@ will simply fill it, and whatever lands there can silently outrank this repo's
 config. The repo must place a Stow-managed symlink at the path so upstream sees
 it as already present.
 
+### Regenerated state
+Files an application writes and rewrites on its own — fish's `fish_variables`,
+Omarchy's `shell.json`, herdr's sockets / logs / `session.json` / `.plugins.lock`.
+Never authored, never carried across machines: baked-in absolute paths and
+per-machine choices make it actively wrong to sync. When it lives *inside* an
+otherwise-tracked config directory, that directory is symlinked file-by-file
+(never folded to a single directory symlink) so the state stays on the local
+machine, outside the repo.
+
 ## Decisions
 
 - **2026-07-10** — Repo restructured into three Stow packages (`common`, `linux`,
@@ -122,8 +131,9 @@ it as already present.
 
 - **2026-07-10** — `.config/fish/fish_variables` (fish's auto-generated universal
   variable store, containing this machine's baked-in absolute paths) is removed from
-  the repo and gitignored — it's regenerated state, not authored config, and must not
-  be carried across machines.
+  the repo and gitignored — it's **Regenerated state**, not authored config, and must
+  not be carried across machines. `.config/fish/` is otherwise tracked file-by-file,
+  so this one file is simply left in place on each machine.
 
 - **2026-08-23** — Omarchy's upgrade to "Quattro" (package-backed layout, v4.0.0)
   switched Hyprland's config format from `.conf` to Lua. It scaffolded fresh
@@ -165,7 +175,7 @@ it as already present.
   clean directory symlink — no per-file adoption needed, unlike the hypr case above.
   `~/.config/omarchy/shell.json` (the shell's bar-layout/settings store, including
   this widget's chosen label format) stays untracked and unstowed: like
-  `fish_variables`, it's regenerated state the app rewrites on every settings
+  `fish_variables`, it's **Regenerated state** the app rewrites on every settings
   change, not authored config. The only on-disk edit made by hand before this move
   was `BarWidget.qml`'s `SystemClock.precision: Minutes -> Seconds`; that edit is
   preserved as-is. Went further and gave the seconds format a real home in
@@ -174,3 +184,29 @@ it as already present.
   leaving it a hand-typed value living only in `shell.json` — the format actually
   in use (`dddd HH:mm:ss`) was not one of the widget's own cycle-through presets,
   so the next right-click on the clock would have silently dropped it for good.
+
+- **2026-09-06** — herdr's `config.toml` moved from `~/.config/herdr/` into
+  `common/.config/herdr/config.toml` and Stow-managed. It goes in `common`, not a
+  per-OS package: herdr reads `~/.config/herdr/config.toml` on both Linux and macOS
+  (no `~/Library` divergence), the file's only machine-specific value
+  (`window_title = "{hostname}: {workspace}"`) is resolved by herdr at runtime, and
+  its keybindings are all `ctrl`/`alt`-based like the cross-OS tmux config — the
+  file is byte-identical on both machines. Only `config.toml` is tracked: herdr fills
+  its config dir with **Regenerated state** (`herdr.sock`, `herdr-client.sock`,
+  `herdr-server.log`, `herdr-client.log`, `session.json`, `.plugins.lock`,
+  `sessions/<name>/`, plus the `config.toml.bak` that `herdr config reset-keys`
+  writes). So the directory must be symlinked file-by-file, never folded to a
+  directory symlink — otherwise herdr writes all of that into the repo working tree.
+  Stow only folds a directory that's absent at the target, so `symlinks.sh` now runs
+  `mkdir -p ~/.config/herdr` before `stow` to guarantee it pre-exists; the runtime
+  files then keep it alive on their own. Considered and rejected: a repo-side
+  `.gitignore` for the runtime files (nothing for it to catch once folding is
+  prevented — the state and the `.bak` all land in the real `~/.config/herdr/`, never
+  the repo) and pointing `HERDR_CONFIG_PATH` at the repo file with no symlink (a new
+  mechanism diverging from how every other config here is managed). herdr itself is
+  self-installed/self-updated into `~/.local/bin` and stays out of the package
+  manifests and init scripts, like hyprecise — README notes it. This machine's
+  `stow -t ~ common linux` still aborts atomically on the three unrelated pre-existing
+  conflicts from the 2026-08-23 Quattro upgrade (`nvim/lua/config/options.lua`,
+  `tmux/tmux.conf`, `hypr/monitors.lua`), so the `config.toml` symlink was created by
+  hand with `ln -s` matching Stow's naming, same workaround as that entry.

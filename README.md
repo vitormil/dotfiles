@@ -45,6 +45,13 @@ Window resizing lives in its own repo, [vitormil/hyprecise](https://github.com/v
 git clone git@github.com:vitormil/hyprecise.git ~/.config/hyprecise
 ```
 
+### herdr
+
+herdr installs and updates itself (`herdr update`) into `~/.local/bin`; it's not in
+the package manifests. Install it from [herdr.dev](https://herdr.dev) if the binary
+is missing. This repo tracks only `common/.config/herdr/config.toml` — herdr's
+sockets, logs, and session state stay in `~/.config/herdr/`, outside the repo.
+
 ## License
 
 MIT.

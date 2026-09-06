@@ -39,6 +39,10 @@ link_vscode_user_files() {
   done
 }
 
+# herdr writes sockets/logs/session state next to its config; pre-create the dir
+# so stow drops a config.toml symlink inside instead of folding the whole dir.
+mkdir -p ~/.config/herdr
+
 case "$(uname -s)" in
   Linux)
     stow "${stow_args[@]}" common linux
