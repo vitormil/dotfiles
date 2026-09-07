@@ -10,3 +10,7 @@ dofile(os.getenv("HOME") .. "/.config/hyprecise/hyprecise.lua").setup()
 
 -- PIP => Super + Y
 o.bind("SUPER + Y", nil, os.getenv("HOME") .. "/.config/hypr/scripts/pip.sh")
+
+-- Unbind default SUPER+RETURN (was: plain Terminal)
+hl.unbind("SUPER + RETURN")
+o.bind("SUPER + RETURN", "Herdr", { omarchy = "terminal-herdr" })
