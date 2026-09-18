@@ -6,6 +6,7 @@ alias lc="l --sort=created"
 alias cd="z"
 alias g="jump"
 alias t="tig"
+alias h="herdr"
 
 alias bi="bundle install"
 alias o="open ."
