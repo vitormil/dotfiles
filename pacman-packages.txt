@@ -19,3 +19,4 @@ atuin
 tig
 libvips
 openslide
+bind
