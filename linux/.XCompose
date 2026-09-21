@@ -1,0 +1,9 @@
+include "/usr/share/omarchy/default/xcompose"
+
+# Identification
+<Multi_key> <space> <n> : "Vitor Oliveira"
+<Multi_key> <space> <e> : "vitormil@gmail.com"
+
+# Cedilha (pt-BR): ' + c -> ç em vez de ć
+<dead_acute> <c> : "ç" ccedilla
+<dead_acute> <C> : "Ç" Ccedilla
